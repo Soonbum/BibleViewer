@@ -1,0 +1,147 @@
+html, body {
+    height: 100%;
+}
+
+#version_section {
+    margin: 1em;
+}
+#search_section {
+    text-align: center;
+}
+#navigation_section {
+    text-align: center;
+    margin: 1em;
+}
+#book_buttons {
+    margin: 1em 0em 1em 10em;
+}
+#chapter_buttons {
+    margin: 1em 0em 1em 10em;
+}
+#contents_section {
+    margin: 1em;
+    height: 90%;
+}
+
+#book_button {
+    width: 4em;
+    height: 4em;
+    text-align: center;
+    vertical-align: top;
+}
+#chapter_button {
+    width: 4em;
+    height: 4em;
+}
+
+#current_book {
+    font-size: medium;
+    width: 10em;
+    height: 3em;
+    vertical-align: top;
+}
+#current_chapter {
+    font-size: medium;
+    width: 5em;
+    height: 3em;
+    vertical-align: top;
+}
+#prev_book {
+    font-size: medium;
+    width: 3em;
+    height: 3em;
+    vertical-align: top;
+}
+#prev_chapter {
+    font-size: medium;
+    width: 3em;
+    height: 3em;
+    vertical-align: top;
+}
+#next_chapter {
+    font-size: medium;
+    width: 3em;
+    height: 3em;
+    vertical-align: top;
+}
+#next_book {
+    font-size: medium;
+    width: 3em;
+    height: 3em;
+    vertical-align: top;
+}
+
+.book_buttons {
+    position: absolute;
+    font-size: medium;
+    width: 9em;
+    z-index: 1;
+}
+
+/* 보이기/숨기기 */
+.display-block {
+    display: block;
+}
+
+.display-inline {
+    display: inline;
+}
+
+.display-inline-block {
+    display: inline-block;
+}
+
+.display-none {
+    display: none;
+}
+
+/* 본문 스타일 */
+.text-column {
+    display: block;
+    position: relative;
+    float: left;
+    padding: 10px;
+}
+
+/* 툴팁과 관련된 스타일 */
+.tooltip {
+    position: relative;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: #ccc;
+    color: #000;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    position: absolute;
+    z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
+
+.tooltip .tooltiptext::after {
+    content: " ";
+    position: absolute;
+    border-style: solid;
+    border-width: 5px;
+}
+
+.tooltip .tooltip-bottom {
+    width: 120px;
+    top: 150%;
+    left: 50%;
+    margin-left: -60px;
+}
+
+.tooltip .tooltip-bottom::after {
+    bottom: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-color: transparent transparent #ccc transparent;
+}        
