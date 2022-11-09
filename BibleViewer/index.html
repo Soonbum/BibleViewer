@@ -13,14 +13,14 @@
 </head>
 <body>
     <div id="version_section">
-        <select id="version" class="display-inline">
+        <select id="version" class="display-inline" onchange="showText()">
             <option value="korhkjv">한글킹제임스흠정역</option>
             <option value="engkjv">영어킹제임스(KJV)</option>
             <option value="korhrv">한글개역성경</option>
         </select>
-        <select id="version" class="display-none"></select>
-        <select id="version" class="display-none"></select>
-        <select id="version" class="display-none"></select>
+        <select id="version" class="display-none" onchange="showText()"></select>
+        <select id="version" class="display-none" onchange="showText()"></select>
+        <select id="version" class="display-none" onchange="showText()"></select>
         <button id="version_add">추가</button>
         <button id="version_del">삭제</button>
     </div>
@@ -319,6 +319,8 @@
     </div>
     
     <div id="contents_section">
+        <!-- 잘 안되면 그냥 테이블 사용하자 -->
+        <!-- 상태 저장, 로드 다시 해보자 -->
         <div id="bodyText" class="display-none"></div>
         <div id="bodyText" class="display-none"></div>
         <div id="bodyText" class="display-none"></div>

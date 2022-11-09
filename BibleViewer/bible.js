@@ -73,7 +73,7 @@ const book_info = [ ['창세기', '창', 50],
 const server_address = 'http://localhost:3000';
 
 // 함수: 현재 표시된 역본 목록 가져오기
-versionList = function() {
+function versionList() {
     let version_combos = document.getElementById('version_section').getElementsByClassName('display-inline');
     let open_version_name = [];    // 표시된 역본 이름들
     for(i=0 ; i < version_combos.length ; i++) {
@@ -83,7 +83,7 @@ versionList = function() {
 }
 
 // 현재 값 저장
-// saveStates = function() {
+// function saveStates() {
 //     // 역본 선택자 상태 저장
 //     let version_combos = document.querySelectorAll('#version');
 //     let version_combos_states = [];
@@ -121,9 +121,6 @@ version_add_button.addEventListener('click', () => {
     }
     showText();
 });
-version_add_button.addEventListener('change', () => {
-    showText();
-});
 
 // 역본 제거 버튼 클릭시
 let version_del_button = document.querySelector('#version_del');
@@ -133,9 +130,6 @@ version_del_button.addEventListener('click', () => {
     if((last_version_combos[last_version_combos.length-1]) && (last_version_combos.length-1 !== 0)) {
         last_version_combos[last_version_combos.length-1].className = 'display-none';
     }
-    showText();
-});
-version_del_button.addEventListener('change', () => {
     showText();
 });
 
@@ -160,7 +154,7 @@ function checkKeyPressed(e) {
 }
 
 // 함수: 이전 책
-prevBook = function() {
+function prevBook() {
     // 현재 선택한 책, 장 알아내기
     let book_button = document.querySelector('#current_book');
     let chapter_button = document.querySelector('#current_chapter');
@@ -186,7 +180,7 @@ prevBook = function() {
 }
 
 // 함수: 이전 장
-prevChapter = function() {
+function prevChapter() {
     // 현재 선택한 책, 장 알아내기
     let book_button = document.querySelector('#current_book');
     let chapter_button = document.querySelector('#current_chapter');
@@ -212,7 +206,7 @@ prevChapter = function() {
 }
 
 // 함수: 다음 장
-nextChapter = function() {
+function nextChapter() {
     // 현재 선택한 책, 장 알아내기
     let book_button = document.querySelector('#current_book');
     let chapter_button = document.querySelector('#current_chapter');
@@ -237,7 +231,7 @@ nextChapter = function() {
 }
 
 // 함수: 다음 책
-nextBook = function() {
+function nextBook() {
     // 현재 선택한 책, 장 알아내기
     let book_button = document.querySelector('#current_book');
     let chapter_button = document.querySelector('#current_chapter');
@@ -349,7 +343,7 @@ let next_book_button = document.querySelector('#next_book');
 next_book_button.addEventListener('click', nextBook);
 
 // 함수: 본문 보여주기 !!!
-showText = async function() {
+async function showText() {
     // 현재 선택한 책, 장 알아내기
     let book_button = document.querySelector('#current_book');
     let chapter_button = document.querySelector('#current_chapter');
@@ -401,7 +395,7 @@ showText = async function() {
 showText();
 
 // 저장한 값 불러오기
-// loadStates = function() {
+// function loadStates() {
 //     // 역본 선택자 상태 복구
 //     let version_combos_states = JSON.parse(localStorage.getItem('version_combos'));
 //     if(version_combos_states) {
