@@ -8,17 +8,21 @@ const fs = require('fs');
 app.use(cors({origin: '*', }));
 
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.send('안녕하세요! 성경보기 서비스 서버입니다.');
 });
 
-// 동적 라우팅 적용
-// 요청 URL 예시 --> localhost:3000/korhkjv/2/5 --> 한글킹제임스흠정역, 출애굽기, 5장
-app.get('/:version/:book/:chapter', (req, res) => {
-  // 역본 종류
-  // korhkjv: 한글킹제임스흠정역
-  // engkjv: 영어킹제임스(KJV)
-  // korhrv: 한글개역성경
+app.listen(port, () => {
+  console.log(`${port} 포트로 통신 중입니다.`);
+});
 
+// 역본 종류
+// korhkjv: 한글킹제임스흠정역
+// engkjv: 영어킹제임스(KJV)
+// korhrv: 한글개역성경
+
+// 본문 요청
+// 요청 URL 예시: localhost:3000/korhkjv/2/5 --> 한글킹제임스흠정역, 출애굽기, 5장
+app.get('/:version/:book/:chapter', (req, res) => {
   let text = '';
   let bookNumber = req.params.book.padStart(2, '0');
   let filename = `bible/${req.params.version}/${req.params.version}${bookNumber}_${req.params.chapter}.lfb`;
@@ -32,6 +36,10 @@ app.get('/:version/:book/:chapter', (req, res) => {
   });
 });
 
-app.listen(port, () => {
-  console.log(`Listening on port ${port}`);
+// 검색 요청
+// 요청 URL 예시: localhost:3000/search/korhkjv/키워드 --> 키워드가 포함된 절을 새로운 창에 보여줌
+app.get('/:version/:keyword', (req, res) => {
+  // !!!
+  console.log(`요청한 키워드: ${req.params.keyword}`);
+  res.send(JSON.stringify(`${req.params.keyword}`));
 });

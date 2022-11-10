@@ -171,9 +171,19 @@ version_del_button.addEventListener('click', () => {
 });
 
 // search_section: 역본 종류를 선택하고 키워드 입력 후 검색 버튼을 누르면 새로운 창에 결과물 보여주기
-// version_to_search: 검색하려는 책 이름
-// keyword_for_search: 검색하려는 단어
 // !!!
+let keyword_tag = document.querySelector('#keyword_for_search');
+let search_button = document.querySelector('#search_button');
+search_button.addEventListener('click', search, false);
+async function search() {
+    let search_version_combo = document.querySelector('#version_to_search');
+    let version_value = search_version_combo.options[search_version_combo.selectedIndex].value;
+    let reqUrl = `${server_address}/${version_value}/${keyword_tag.value}`;
+
+    const res = await fetch(reqUrl);
+    const bodyText = await res.json();
+    console.log(bodyText);
+}
 
 
 let current_book = '';      // 현재 선택한 책 (창세기, 출애굽기, ...)
