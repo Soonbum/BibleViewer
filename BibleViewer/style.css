@@ -97,10 +97,7 @@ html, body {
 
 /* 본문 스타일 */
 .text-column {
-    display: block;
-    position: relative;
-    float: left;
-    padding: 10px;
+    display: inline;
 }
 
 /* 툴팁과 관련된 스타일 */

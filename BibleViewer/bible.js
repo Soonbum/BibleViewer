@@ -82,27 +82,64 @@ function versionList() {
     return open_version_name;
 }
 
+loadStates();
+
+// 저장한 값 불러오기
+function loadStates() {
+    // 역본 선택자 상태 복구
+    let version_combos_states = JSON.parse(localStorage.getItem('version_combos'));
+    if(version_combos_states) {
+        let version_combos = document.querySelectorAll('#version');
+        for(i=0 ; i < version_combos.length ; i++) {
+            if((!version_combos[i].innerHTML) && (version_combos_states[i][1] !== -1)) {
+                for(j=0 ; j < Object.keys(version_name).length ; j++) {
+                    let new_combo = document.createElement('option');
+                    new_combo.setAttribute('value', `${Object.keys(version_name)[j]}`);
+                    new_combo.innerHTML = `${Object.values(version_name)[j]}`;
+                    version_combos[i].appendChild(new_combo);
+                }
+            }
+            version_combos[i].className = version_combos_states[i][0];
+            version_combos[i].selectedIndex = parseInt(version_combos_states[i][1]);
+        }
+    }
+
+    // 현재 책 복구
+    let book_button = document.querySelector('#current_book');
+    let current_book = JSON.parse(localStorage.getItem('current_book'));
+    if(current_book) {
+        book_button.innerHTML = current_book;
+    }
+
+    // 현재 장 복구
+    let chapter_button = document.querySelector('#current_chapter');
+    let current_chapter = JSON.parse(localStorage.getItem('current_chapter'));
+    if(current_chapter) {
+        chapter_button.innerHTML = current_chapter;
+    }
+}
+
 // 현재 값 저장
-// function saveStates() {
-//     // 역본 선택자 상태 저장
-//     let version_combos = document.querySelectorAll('#version');
-//     let version_combos_states = [];
-//     for(i=0 ; i < version_combos.length ; i++) {
-//         version_combos_states[i] = [version_combos[i].className, version_combos[i].selectedIndex];   // class 이름과 인덱스 저장
-//     }
+function saveStates() {
+    // 역본 선택자 상태 저장
+    let version_combos = document.querySelectorAll('#version');
+    let version_combos_states = [];
+    for(i=0 ; i < version_combos.length ; i++) {
+        version_combos_states[i] = [version_combos[i].className, version_combos[i].selectedIndex];   // class 이름과 인덱스 저장
+    }
 
-//     // 현재 선택한 책, 장 알아내기
-//     let book_button = document.querySelector('#current_book');
-//     let chapter_button = document.querySelector('#current_chapter');
+    // 현재 선택한 책, 장 알아내기
+    let book_button = document.querySelector('#current_book');
+    let chapter_button = document.querySelector('#current_chapter');
 
-//     current_book = book_button.innerHTML;
-//     current_chapter = chapter_button.innerHTML;
+    current_book = book_button.innerHTML;
+    current_chapter = chapter_button.innerHTML;
 
-//     // 로컬저장소에 값 저장하기
-//     localStorage.setItem('version_combos', JSON.stringify(version_combos_states));
-//     localStorage.setItem('current_book', JSON.stringify(current_book));
-//     localStorage.setItem('current_chapter', JSON.stringify(current_chapter));
-// }
+    // 로컬저장소에 값 저장하기
+    localStorage.setItem('version_combos', JSON.stringify(version_combos_states));
+    localStorage.setItem('current_book', JSON.stringify(current_book));
+    localStorage.setItem('current_chapter', JSON.stringify(current_chapter));
+}
 
 
 // 역본 추가 버튼 클릭시
@@ -342,7 +379,7 @@ next_chapter_button.addEventListener('click', nextChapter);
 let next_book_button = document.querySelector('#next_book');
 next_book_button.addEventListener('click', nextBook);
 
-// 함수: 본문 보여주기 !!!
+// 함수: 본문 보여주기
 async function showText() {
     // 현재 선택한 책, 장 알아내기
     let book_button = document.querySelector('#current_book');
@@ -375,10 +412,6 @@ async function showText() {
         }
     }
 
-    // 화면을 분할함
-    //let contents_section_div = document.getElementById('contents_section');
-    //contents_section_div.style = `column-count: ${nShow}; column-rule: 0.2em solid #ccc;`;
-
     // 본문 내용 서버로부터 가져오기
     for(i=0 ; i < nShow ; i++) {
         let version_value = version_combos[i].options[version_combos[i].selectedIndex].value;
@@ -387,45 +420,10 @@ async function showText() {
 
             const res = await fetch(reqUrl);
             const bodyText = await res.json();
-            text_divs[i].innerHTML = bodyText;
-            //text_divs[i].style.width = `${totalWidth/nShow}px`;
+            text_divs[i].innerHTML = `${bodyText.replace(/^[0-9]+.+ [0-9]+:/gm, '').replaceAll('\n', '<br>')}`;
         }
     }
+
+    saveStates();
 }
 showText();
-
-// 저장한 값 불러오기
-// function loadStates() {
-//     // 역본 선택자 상태 복구
-//     let version_combos_states = JSON.parse(localStorage.getItem('version_combos'));
-//     if(version_combos_states) {
-//         let version_combos = document.querySelectorAll('#version');
-//         for(i=0 ; i < version_combos.length ; i++) {
-//             if(!version_combos[i].innerHTML) {
-//                 for(j=0 ; j < Object.keys(version_name).length ; j++) {
-//                     let new_combo = document.createElement('option');
-//                     new_combo.setAttribute('value', `${Object.keys(version_name)[j]}`);
-//                     new_combo.innerHTML = `${Object.values(version_name)[j]}`;
-//                     version_combos[i].appendChild(new_combo);
-//                 }
-//             }
-//             version_combos[i].className = version_combos_states[i][0];
-//             version_combos[i].selectedIndex = parseInt(version_combos_states[i][1]);
-//         }
-//     }
-
-//     // 현재 책 복구
-//     let book_button = document.querySelector('#current_book');
-//     let current_book = JSON.parse(localStorage.getItem('current_book'));
-//     if(current_book) {
-//         book_button.innerHTML = current_book;
-//     }
-
-//     // 현재 장 복구
-//     let chapter_button = document.querySelector('#current_chapter');
-//     let current_chapter = JSON.parse(localStorage.getItem('current_chapter'));
-//     if(current_chapter) {
-//         chapter_button.innerHTML = current_chapter;
-//     }
-// }
-// loadStates();
