@@ -40,6 +40,21 @@ app.get('/:version/:book/:chapter', (req, res) => {
 // 요청 URL 예시: localhost:3000/search/korhkjv/키워드 --> 키워드가 포함된 절을 새로운 창에 보여줌
 app.get('/:version/:keyword', (req, res) => {
   // !!!
+  // 요청 값 저장
+  let version = req.params.version;
+  let keyword = req.params.keyword;
+
+  // 선택한 역본에서 키워드 전체 검색 시도
+  // ...
+  // let bookNumber = 01 ~ 66 [1번째 반복문 경계]
+  // let chapterNumber = 1 ~ 150(가변) [2번째 반복문 경계]
+  // 파일명: bible/${req.params.version}/${req.params.version}${bookNumber}_${chapterNumber}.lfb
+
+
+
+
+
+  // 데모 모드
   console.log(`요청한 키워드: ${req.params.keyword}`);
   res.send(JSON.stringify(`${req.params.keyword}`));
 });

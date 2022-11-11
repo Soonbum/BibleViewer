@@ -7,6 +7,7 @@ html, body {
 }
 #search_section {
     text-align: center;
+    padding: 1em;
 }
 #navigation_section {
     text-align: center;
@@ -93,6 +94,27 @@ html, body {
 
 .display-none {
     display: none;
+}
+
+/* 검색 결과 관련 컨텐츠 */
+#special_button_section {
+    position: relative;
+    text-align: center;
+}
+
+#search_result_section {
+    position: relative;
+    text-align: center;
+    padding: 1em;
+}
+
+#show_text_button {
+    font-size: medium;
+    width: 10em;
+    height: 3em;
+    vertical-align: top;
+    position: relative;
+    padding: 1em;
 }
 
 /* 본문 스타일 */

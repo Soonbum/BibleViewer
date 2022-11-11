@@ -170,7 +170,7 @@ version_del_button.addEventListener('click', () => {
     showText();
 });
 
-// search_section: 역본 종류를 선택하고 키워드 입력 후 검색 버튼을 누르면 새로운 창에 결과물 보여주기
+// 역본 종류를 선택하고 키워드 입력 후 검색 버튼을 누르면 새로운 창에 결과물 보여주기
 // !!!
 let keyword_tag = document.querySelector('#keyword_for_search');
 let search_button = document.querySelector('#search_button');
@@ -182,8 +182,40 @@ async function search() {
 
     const res = await fetch(reqUrl);
     const bodyText = await res.json();
-    console.log(bodyText);
+
+    // 검색 결과 보여주기 !!!
+    let special_buttion_section = document.querySelector('#special_button_section');
+    let search_result_section = document.querySelector('#search_result_section');
+    special_buttion_section.classList = 'display-block';
+    search_result_section.classList = 'display-block';
+    search_result_section.innerHTML = bodyText;
+    
+    // 네비게이션 버튼 숨기기
+    let navigation_section = document.querySelector('#navigation_section');
+    navigation_section.classList = 'display-none';
+
+    // 성경 본문 숨기기
+    let contents_section = document.querySelector('#contents_section');
+    contents_section.classList = 'display-none';
 }
+
+// 성경 보기 모드 버튼 클릭시
+let text_view_mode_button = document.querySelector('#show_text_button');
+text_view_mode_button.addEventListener('click', () => {
+    // 검색 결과 숨기기
+    let special_buttion_section = document.querySelector('#special_button_section');
+    let search_result_section = document.querySelector('#search_result_section');
+    special_buttion_section.classList = 'display-none';
+    search_result_section.classList = 'display-none';
+    
+    // 네비게이션 버튼 보여주기
+    let navigation_section = document.querySelector('#navigation_section');
+    navigation_section.classList = 'display-block';
+
+    // 성경 본문 보여주기
+    let contents_section = document.querySelector('#contents_section');
+    contents_section.classList = 'display-block';
+});
 
 
 let current_book = '';      // 현재 선택한 책 (창세기, 출애굽기, ...)
