@@ -181,14 +181,15 @@ async function search() {
     let reqUrl = `${server_address}/${version_value}/${keyword_tag.value}`;
 
     const res = await fetch(reqUrl);
-    const bodyText = await res.json();
+    let bodyText = await res.json();
 
     // 검색 결과 보여주기 !!!
     let special_buttion_section = document.querySelector('#special_button_section');
     let search_result_section = document.querySelector('#search_result_section');
     special_buttion_section.classList = 'display-block';
     search_result_section.classList = 'display-block';
-    search_result_section.innerHTML = bodyText;
+    console.log(bodyText.split('\n'));
+    search_result_section.innerHTML = bodyText.split('\n');
     
     // 네비게이션 버튼 숨기기
     let navigation_section = document.querySelector('#navigation_section');

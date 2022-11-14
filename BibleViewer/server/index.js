@@ -29,7 +29,7 @@ app.get('/:version/:book/:chapter', (req, res) => {
   fs.readFile(filename, 'utf8', (err, text) => {
     if(err) {
       console.error(err);
-      return
+      return;
     } else {
       res.send(JSON.stringify(`${text}`));
     }
@@ -39,22 +39,36 @@ app.get('/:version/:book/:chapter', (req, res) => {
 // 검색 요청
 // 요청 URL 예시: localhost:3000/search/korhkjv/키워드 --> 키워드가 포함된 절을 새로운 창에 보여줌
 app.get('/:version/:keyword', (req, res) => {
-  // !!!
+  console.log(`요청한 키워드: ${req.params.keyword}`);
+
   // 요청 값 저장
-  let version = req.params.version;
   let keyword = req.params.keyword;
+  let foundVerse = [];
 
   // 선택한 역본에서 키워드 전체 검색 시도
-  // ...
-  // let bookNumber = 01 ~ 66 [1번째 반복문 경계]
-  // let chapterNumber = 1 ~ 150(가변) [2번째 반복문 경계]
-  // 파일명: bible/${req.params.version}/${req.params.version}${bookNumber}_${chapterNumber}.lfb
+  for(i=1 ; i<=66 ; i++) {
+    for(j=1 ; j<=150 ; j++) {
+      let bookNumber = fillZeroStart(2, `${i}`);
+      let chapterNumber = `${j}`;
+      let filename = `bible/${req.params.version}/${req.params.version}${bookNumber}_${chapterNumber}.lfb`;
 
+      if(!fs.existsSync(filename)) break;
 
-
-
-
-  // 데모 모드
-  console.log(`요청한 키워드: ${req.params.keyword}`);
-  res.send(JSON.stringify(`${req.params.keyword}`));
+      let wholeText = fs.readFileSync(filename, 'utf8', 'r');
+      if(wholeText) {
+        let lines = wholeText.split('\n');
+        for(k=0 ; k<lines.length ; k++) {
+          if(lines[k].search(keyword) !== -1) {
+            foundVerse.push(`${lines[k]}\n`);
+          }
+        }
+      }
+    }
+  }
+  res.send(JSON.stringify(`${foundVerse}`));
 });
+
+// 함수: 자릿수만큼 남은 앞부분을 0으로 채움
+function fillZeroStart(width, str) {
+  return str.length >= width ? str:new Array(width-str.length+1).join('0')+str;
+}
