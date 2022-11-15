@@ -112,9 +112,8 @@ html, body {
     font-size: medium;
     width: 10em;
     height: 3em;
-    vertical-align: top;
+    vertical-align: middle;
     position: relative;
-    padding: 1em;
 }
 
 /* 본문 스타일 */

@@ -58,7 +58,8 @@ app.get('/:version/:keyword', (req, res) => {
       if(wholeText) {
         let lines = wholeText.split('\n');
         for(k=0 ; k<lines.length ; k++) {
-          if(lines[k].search(keyword) !== -1) {
+          // lines[k]에서 괄호 문자, 한자를 제거한 후 검색 시도
+          if(lines[k].replace(/[\(\)\[\]{}一-龥]*/gim, '').search(keyword) !== -1) {
             foundVerse.push(`${lines[k]}\n`);
           }
         }

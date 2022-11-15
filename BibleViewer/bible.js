@@ -171,7 +171,6 @@ version_del_button.addEventListener('click', () => {
 });
 
 // 역본 종류를 선택하고 키워드 입력 후 검색 버튼을 누르면 새로운 창에 결과물 보여주기
-// !!!
 let keyword_tag = document.querySelector('#keyword_for_search');
 let search_button = document.querySelector('#search_button');
 search_button.addEventListener('click', search, false);
@@ -181,15 +180,27 @@ async function search() {
     let reqUrl = `${server_address}/${version_value}/${keyword_tag.value}`;
 
     const res = await fetch(reqUrl);
-    let bodyText = await res.json();
+    let inboundText = await res.json();
+    let bodyText = '';
 
-    // 검색 결과 보여주기 !!!
+    inboundText = inboundText.split('\n');
+    inboundText = inboundText.filter((elem) => {
+        // 빈 요소 제거
+        return elem !== undefined && elem !== null && elem !== '';
+    });
+    bodyText += `<strong>총 ${inboundText.length}개의 결과를 찾았습니다.</strong><br><br>`;
+    for(i=0 ; i<inboundText.length ; i++) {
+        // 맨 앞의 , 기호 제거하고 책 번호 제거하기
+        inboundText[i] = inboundText[i].replace(/^,/gm, '').replace(/^[0-9][0-9]/gm, '');
+        bodyText += (inboundText[i] + '<br><br>');
+    }
+
+    // 검색 결과 보여주기
     let special_buttion_section = document.querySelector('#special_button_section');
     let search_result_section = document.querySelector('#search_result_section');
     special_buttion_section.classList = 'display-block';
     search_result_section.classList = 'display-block';
-    console.log(bodyText.split('\n'));
-    search_result_section.innerHTML = bodyText.split('\n');
+    search_result_section.innerHTML = bodyText;
     
     // 네비게이션 버튼 숨기기
     let navigation_section = document.querySelector('#navigation_section');
@@ -459,11 +470,33 @@ async function showText() {
     for(i=0 ; i < nShow ; i++) {
         let version_value = version_combos[i].options[version_combos[i].selectedIndex].value;
         if(version_value) {
+            let bodyText = '';
+            let horizontalLineCount = 0;
             let reqUrl = `${server_address}/${version_value}/${current_book_index}/${current_chapter_index}`;
 
             const res = await fetch(reqUrl);
-            const bodyText = await res.json();
-            text_divs[i].innerHTML = `${bodyText.replace(/^[0-9]+.+ [0-9]+:/gm, '').replaceAll('\n', '<br>')}`;
+            let inboundText = await res.json();
+
+            inboundText = inboundText.split('\n');
+            for(j=0 ; j<inboundText.length ; j++) {
+                inboundText[j] = inboundText[j].replace(/^[0-9]+.+ [0-9]+:/gm, '');
+
+                // 1번째 공백을 기준으로 처음 나오는 절 번호에 컬러값 부여
+                let spacePos = inboundText[j].indexOf(' ');
+                let statement = '<p style="display:inline; color:#FB7A01;">' + inboundText[j].substr(0, spacePos) + '</p>' + inboundText[j].substr(spacePos, inboundText[j].length)
+
+                //bodyText += (inboundText[j] + '<br>');
+                bodyText += statement + '<br>';
+                horizontalLineCount++;
+
+                // 5절씩 끊기
+                if(horizontalLineCount === 5) {
+                    bodyText += '<br>';
+                    horizontalLineCount = 0;
+                }
+            }
+
+            text_divs[i].innerHTML = bodyText;
         }
     }
 
