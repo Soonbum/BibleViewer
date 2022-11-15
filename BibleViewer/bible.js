@@ -70,7 +70,8 @@ const book_info = [ ['창세기', '창', 50],
                     ['요한계시록', '계', 22], ];
 
 // 상수: 서버에 대한 정보
-const server_address = 'http://localhost:3000';
+//const server_address = 'https://bible-viewer.herokuapp.com:37974';
+const server_address = 'http://localhost:37974';
 
 // 함수: 현재 표시된 역본 목록 가져오기
 function versionList() {

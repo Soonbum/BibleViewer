@@ -1,13 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const port = 3000;
+const port = 37974;  // process.env.PORT
 
 const fs = require('fs');
 
-app.use(cors({origin: '*', }));
+app.use(cors({origin: '*'}));
 
 app.get('/', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
   res.send('안녕하세요! 성경보기 서비스 서버입니다.');
 });
 
@@ -31,6 +32,7 @@ app.get('/:version/:book/:chapter', (req, res) => {
       console.error(err);
       return;
     } else {
+      res.header('Access-Control-Allow-Origin', '*');
       res.send(JSON.stringify(`${text}`));
     }
   });
@@ -66,6 +68,7 @@ app.get('/:version/:keyword', (req, res) => {
       }
     }
   }
+  res.header('Access-Control-Allow-Origin', '*');
   res.send(JSON.stringify(`${foundVerse}`));
 });
 
