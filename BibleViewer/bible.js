@@ -70,7 +70,7 @@ const book_info = [ ['창세기', '창', 50],
                     ['요한계시록', '계', 22], ];
 
 // 상수: 서버에 대한 정보
-//const server_address = 'https://bible-viewer.herokuapp.com:37974';
+//const server_address = 'https://bible-viewer.herokuapp.com';
 const server_address = 'http://localhost:37974';
 
 // 함수: 현재 표시된 역본 목록 가져오기
@@ -178,9 +178,17 @@ search_button.addEventListener('click', search, false);
 async function search() {
     let search_version_combo = document.querySelector('#version_to_search');
     let version_value = search_version_combo.options[search_version_combo.selectedIndex].value;
-    let reqUrl = `${server_address}/${version_value}/${keyword_tag.value}`;
 
-    const res = await fetch(reqUrl);
+    const res = await fetch(`${server_address}/search`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            version: `${version_value}`,
+            keyword: `${keyword_tag.value}`,
+        }),
+    });
     let inboundText = await res.json();
     let bodyText = '';
 
@@ -473,9 +481,18 @@ async function showText() {
         if(version_value) {
             let bodyText = '';
             let horizontalLineCount = 0;
-            let reqUrl = `${server_address}/${version_value}/${current_book_index}/${current_chapter_index}`;
-
-            const res = await fetch(reqUrl);
+            
+            const res = await fetch(`${server_address}/view`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    version: `${version_value}`,
+                    book: `${current_book_index}`,
+                    chapter: `${current_chapter_index}`,
+                }),
+            });
             let inboundText = await res.json();
 
             inboundText = inboundText.split('\n');
@@ -486,7 +503,6 @@ async function showText() {
                 let spacePos = inboundText[j].indexOf(' ');
                 let statement = '<p style="display:inline; color:#FB7A01;">' + inboundText[j].substr(0, spacePos) + '</p>' + inboundText[j].substr(spacePos, inboundText[j].length)
 
-                //bodyText += (inboundText[j] + '<br>');
                 bodyText += statement + '<br>';
                 horizontalLineCount++;
 

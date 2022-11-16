@@ -1,11 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const port = 37974;  // process.env.PORT
+const port = process.env.PORT || 37974;
 
 const fs = require('fs');
 
 app.use(cors({origin: '*'}));
+app.use(express.json());
 
 app.get('/', (req, res) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -22,11 +23,10 @@ app.listen(port, () => {
 // korhrv: 한글개역성경
 
 // 본문 요청
-// 요청 URL 예시: localhost:3000/korhkjv/2/5 --> 한글킹제임스흠정역, 출애굽기, 5장
-app.get('/:version/:book/:chapter', (req, res) => {
-  let text = '';
-  let bookNumber = req.params.book.padStart(2, '0');
-  let filename = `bible/${req.params.version}/${req.params.version}${bookNumber}_${req.params.chapter}.lfb`;
+app.post('/view', (req, res) => {
+  console.log(req.body);
+  let bookNumber = fillZeroStart(2, `${req.body.book}`);
+  let filename = `bible/${req.body.version}/${req.body.version}${bookNumber}_${req.body.chapter}.lfb`;
   fs.readFile(filename, 'utf8', (err, text) => {
     if(err) {
       console.error(err);
@@ -39,12 +39,11 @@ app.get('/:version/:book/:chapter', (req, res) => {
 });
 
 // 검색 요청
-// 요청 URL 예시: localhost:3000/search/korhkjv/키워드 --> 키워드가 포함된 절을 새로운 창에 보여줌
-app.get('/:version/:keyword', (req, res) => {
-  console.log(`요청한 키워드: ${req.params.keyword}`);
+app.post('/search', (req, res) => {
+  console.log(`요청한 키워드: ${req.body.keyword}`);
 
   // 요청 값 저장
-  let keyword = req.params.keyword;
+  let keyword = req.body.keyword;
   let foundVerse = [];
 
   // 선택한 역본에서 키워드 전체 검색 시도
@@ -52,7 +51,7 @@ app.get('/:version/:keyword', (req, res) => {
     for(j=1 ; j<=150 ; j++) {
       let bookNumber = fillZeroStart(2, `${i}`);
       let chapterNumber = `${j}`;
-      let filename = `bible/${req.params.version}/${req.params.version}${bookNumber}_${chapterNumber}.lfb`;
+      let filename = `bible/${req.body.version}/${req.body.version}${bookNumber}_${chapterNumber}.lfb`;
 
       if(!fs.existsSync(filename)) break;
 
