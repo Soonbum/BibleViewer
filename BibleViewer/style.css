@@ -36,46 +36,42 @@ html, body {
 }
 
 #current_book {
-    font-size: medium;
     width: 10em;
     height: 3em;
     vertical-align: top;
 }
 #current_chapter {
-    font-size: medium;
     width: 5em;
     height: 3em;
     vertical-align: top;
 }
 #prev_book {
-    font-size: medium;
-    width: 3em;
+    width: 2em;
     height: 3em;
     vertical-align: top;
 }
 #prev_chapter {
-    font-size: medium;
-    width: 3em;
+    width: 2em;
     height: 3em;
     vertical-align: top;
 }
 #next_chapter {
-    font-size: medium;
-    width: 3em;
+    width: 2em;
     height: 3em;
     vertical-align: top;
 }
 #next_book {
-    font-size: medium;
-    width: 3em;
+    width: 2em;
     height: 3em;
     vertical-align: top;
 }
 
-.book_buttons {
+#book_buttons {
     position: absolute;
-    font-size: medium;
-    width: 9em;
+    z-index: 1;
+}
+#chapter_buttons {
+    position: absolute;
     z-index: 1;
 }
 
