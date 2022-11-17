@@ -70,8 +70,8 @@ const book_info = [ ['창세기', '창', 50],
                     ['요한계시록', '계', 22], ];
 
 // 상수: 서버에 대한 정보
-//const server_address = 'https://bible-viewer.herokuapp.com';
-const server_address = 'http://localhost:37974';
+const server_address = 'https://bible-viewer.herokuapp.com';
+//const server_address = 'http://localhost:37974';
 
 // 함수: 현재 표시된 역본 목록 가져오기
 function versionList() {
@@ -179,7 +179,7 @@ async function search() {
     let search_version_combo = document.querySelector('#version_to_search');
     let version_value = search_version_combo.options[search_version_combo.selectedIndex].value;
 
-    const res = await fetch(`${server_address}/search`, {
+    const res = await fetch(`${server_address}/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -482,7 +482,7 @@ async function showText() {
             let bodyText = '';
             let horizontalLineCount = 0;
             
-            const res = await fetch(`${server_address}/view`, {
+            const res = await fetch(`${server_address}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
