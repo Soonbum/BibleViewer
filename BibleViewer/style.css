@@ -88,6 +88,14 @@ html, body {
     display: none;
 }
 
+.contents-style {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-flow: row;
+    height: 100%;
+    vertical-align: top;
+}
+
 /* 검색 결과 관련 컨텐츠 */
 #special_button_section {
     position: relative;

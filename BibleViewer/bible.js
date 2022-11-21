@@ -216,8 +216,8 @@ async function search() {
     navigation_section.classList = 'display-none';
 
     // 성경 본문 숨기기
-    let contents_section = document.querySelector('#contents_section');
-    contents_section.classList = 'display-none';
+    let contents = document.querySelector('#contents_section');
+    contents.classList = 'display-none';
 }
 
 // 성경 보기 모드 버튼 클릭시
@@ -234,8 +234,8 @@ text_view_mode_button.addEventListener('click', () => {
     navigation_section.classList = 'display-block';
 
     // 성경 본문 보여주기
-    let contents_section = document.querySelector('#contents_section');
-    contents_section.classList = 'display-block';
+    let contents = document.querySelector('#contents_section');
+    contents.classList = 'contents-style';
 });
 
 
