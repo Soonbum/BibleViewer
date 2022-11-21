@@ -19,10 +19,6 @@ html, body {
 #chapter_buttons {
     margin: 1em 0em 1em 10em;
 }
-#contents_section {
-    margin: 1em;
-    height: 90%;
-}
 
 #book_button {
     width: 4em;
