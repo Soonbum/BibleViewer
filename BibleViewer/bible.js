@@ -70,7 +70,7 @@ const book_info = [ ['창세기', '창', 50],
                     ['요한계시록', '계', 22], ];
 
 // 상수: 서버에 대한 정보
-const server_address = 'https://bible-viewer.herokuapp.com';
+const server_address = 'http://bibleviewer.cafe24app.com';
 //const server_address = 'http://localhost:37974';
 
 // 함수: 현재 표시된 역본 목록 가져오기
@@ -501,7 +501,7 @@ async function showText() {
 
                 // 1번째 공백을 기준으로 처음 나오는 절 번호에 컬러값 부여
                 let spacePos = inboundText[j].indexOf(' ');
-                let statement = '<p style="display:inline; color:#FB7A01;">' + inboundText[j].substr(0, spacePos) + '</p>' + inboundText[j].substr(spacePos, inboundText[j].length)
+                let statement = '<p style="display:inline; color:#FB7A01;">' + inboundText[j].substr(0, spacePos) + '</p>' + inboundText[j].substr(spacePos, inboundText[j].length);
 
                 bodyText += statement + '<br>';
                 horizontalLineCount++;

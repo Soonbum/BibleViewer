@@ -2,10 +2,10 @@
   "name": "bible-server",
   "version": "1.0.0",
   "description": "server for BibleViewer",
-  "main": "index.js",
+  "main": "web.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon ./index.js"
+    "start": "node web.js",
+    "dev": "nodemon ./web.js"
   },
   "keywords": [
     "bible"
