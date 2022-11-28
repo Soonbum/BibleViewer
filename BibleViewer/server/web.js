@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const port = 8001;  // process.env.PORT || 37974;
+const port = 8001 || process.env.PORT;
 
 const fs = require('fs');
 
@@ -38,7 +38,7 @@ app.post('/', (req, res) => {
       for(j=1 ; j<=150 ; j++) {
         let bookNumber = fillZeroStart(2, `${i}`);
         let chapterNumber = `${j}`;
-        let filename = `/home/hosting_users/peacemaker84/apps/peacemaker84_bibleviewer/bible/${req.body.version}/${req.body.version}${bookNumber}_${chapterNumber}.lfb`;
+        let filename = `${__dirname}/bible/${req.body.version}/${req.body.version}${bookNumber}_${chapterNumber}.lfb`;
 
         if(!fs.existsSync(filename)) break;
 
@@ -60,7 +60,7 @@ app.post('/', (req, res) => {
   // 본문 요청 (버전, 책 번호, 장 번호)
   else {
     let bookNumber = fillZeroStart(2, `${req.body.book}`);
-    let filename = `/home/hosting_users/peacemaker84/apps/peacemaker84_bibleviewer/bible/${req.body.version}/${req.body.version}${bookNumber}_${req.body.chapter}.lfb`;
+    let filename = `${__dirname}/bible/${req.body.version}/${req.body.version}${bookNumber}_${req.body.chapter}.lfb`;
     fs.readFile(filename, 'utf8', (err, text) => {
       if(err) {
         console.error(err);

@@ -71,7 +71,7 @@ const book_info = [ ['창세기', '창', 50],
 
 // 상수: 서버에 대한 정보
 const server_address = 'http://bibleviewer.cafe24app.com';
-//const server_address = 'http://localhost:37974';
+//const server_address = 'http://localhost:8001';
 
 // 함수: 현재 표시된 역본 목록 가져오기
 function versionList() {
