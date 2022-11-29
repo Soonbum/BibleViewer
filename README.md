@@ -21,3 +21,11 @@
   - nodemon 설치하기: `npm install nodemon --save-dev`
 
   - 실행하기: `npm start` (서버 재시작하지 않음) 또는 `npm run dev` (스크립트 수정시 서버 자동 재시작)
+
+# 현재 서비스 중
+  
+![스크린샷](https://user-images.githubusercontent.com/16474083/204410530-ec085be5-bb4d-463e-b50d-50f187d9b020.png)
+
+  - [성경 뷰어](http://peacemaker84.dothome.co.kr/BibleViewer/index.html)
+  
+  - 카페24 웹호스팅 이용중
