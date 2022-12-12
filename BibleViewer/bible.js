@@ -70,8 +70,8 @@ const book_info = [ ['창세기', '창', 50],
                     ['요한계시록', '계', 22], ];
 
 // 상수: 서버에 대한 정보
-const server_address = 'http://bibleviewer.cafe24app.com';
-//const server_address = 'http://localhost:8001';
+//const server_address = 'http://bibleviewer.cafe24app.com';
+const server_address = 'http://localhost:8001';
 
 // 함수: 현재 표시된 역본 목록 가져오기
 function versionList() {
@@ -182,6 +182,7 @@ async function search() {
     const res = await fetch(`${server_address}/`, {
         method: 'POST',
         headers: {
+            'Request-Type': 'Search Results',
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -239,7 +240,7 @@ text_view_mode_button.addEventListener('click', () => {
 });
 
 
-let current_book = '';      // 현재 선택한 책 (창세기, 출애굽기, ...)
+let current_book = '';      // 현재 선택한 책 (창세기, 출애굽기 등)
 let current_chapter = 0;    // 현재 선택한 장
 
 // 키보드 이벤트
@@ -291,7 +292,15 @@ function prevChapter() {
     for(i=0 ; i < book_info.length ; i++) {
         if(current_book === book_info[i][0]) {
             if(current_chapter==='1장') {
-                current_chapter = book_info[i][2] + '장';
+                // 이전 책의 마지막 장으로 이동
+                if(i===0) {
+                    book_button.innerHTML = book_info[book_info.length-1][0];
+                    current_chapter = book_info[book_info.length-1][2] + '장';
+                } else {
+                    book_button.innerHTML = book_info[i-1][0];
+                    current_chapter = book_info[i-1][2] + '장';
+                }
+
                 break;
             } else {
                 let chapterNumber = parseInt(current_chapter)-1;
@@ -318,10 +327,20 @@ function nextChapter() {
         if(current_book === book_info[i][0]) {
             let chapterNumber = parseInt(current_chapter);
             if(chapterNumber === book_info[i][2]) {
-                current_chapter = '1장';
+                // 다음 책의 1장으로 이동
+                if(i===book_info.length-1) {
+                    book_button.innerHTML = book_info[0][0];
+                } else {
+                    book_button.innerHTML = book_info[i+1][0];
+                }
+
+                chapterNumber = 1;
+                current_chapter = chapterNumber + '장';
+                break;
             } else {
                 chapterNumber++;
                 current_chapter = chapterNumber + '장';
+                break;
             }
         }
     }
@@ -485,6 +504,7 @@ async function showText() {
             const res = await fetch(`${server_address}/`, {
                 method: 'POST',
                 headers: {
+                    'Request-Type': 'Body Text',
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
