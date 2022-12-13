@@ -7,6 +7,9 @@ const fs = require('fs');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const sqlite3 = require('sqlite3');
+const { response } = require('express');
+
 app.use(cors({origin: '*'}));
 app.use(express.json());
 
@@ -24,7 +27,7 @@ app.listen(port, () => {
 // engkjv: 영어킹제임스(KJV)
 // korhrv: 한글개역성경
 
-app.post('/', (req, res) => {
+app.post('/', async (req, res) => {
   let keyword = req.body.keyword;
 
   // 검색 요청 (버전, 키워드)
@@ -76,10 +79,71 @@ app.post('/', (req, res) => {
   }
 
   // 가입 요청
-  // ... 요청 메시지에서 id 정보 중복 체크 --> 기존 DB에서 id 중복된 거 없으면 성공, 중복 있으면 실패 메시지를 보냄
+  if(req.get('Request-Type') === 'Join Request') {
+    let id = req.body.id;
+    let password = req.body.password;
+    let nickname = req.body.nickname;
+    let email = req.body.email;
+
+    // 개인정보를 저장하기 위한 DB 파일 생성
+    const db = new sqlite3.Database(`${__dirname}/userData.db`);
+    let sql_stmt = '';
+
+    // 패스워드 암호화
+    const salt = await bcrypt.genSalt(10);
+    const hashed = await bcrypt.hash(password, salt);
+
+    // 개인정보 테이블이 없으면 생성할 것
+    db.run('CREATE TABLE IF NOT EXISTS PersonInfo(id TEXT PRIMARY KEY, password TEXT, nickname TEXT, email TEXT);');
+
+    // 클라이언트가 요청한 ID가 기존에 입력된 ID인지 체크 (중복 체크)
+    let responseMessage = [];
+    let bValidPersonInfo = true;
+    sql_stmt = `SELECT * FROM PersonInfo WHERE id = '${id}'`;
+    db.all(sql_stmt, [], (err, rows) => {
+      // ID가 중복되지 않을 경우
+      if(rows.length === 0) {
+        // ID 문자열 길이는 최소 5글자
+        if(id.length < 5) {
+          responseMessage.push('ID 길이는 5글자 이상이어야 합니다.');
+          bValidPersonInfo = false;
+        }
+
+        // 이메일 유효성 검사
+        if(!email.match('^[a-zA-Z0-9+-\_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')) {
+          responseMessage.push('이메일 주소가 유효하지 않습니다.');
+          bValidPersonInfo = false;
+        }
+
+        // 개인정보가 유효할 경우 DB에 저장
+        if(bValidPersonInfo === true) {
+          sql_stmt = `INSERT INTO PersonInfo(id, password, nickname, email) VALUES('${id}', '${hashed}', '${nickname}', '${email}');`
+          db.run(sql_stmt, (err) => {
+            if(err) {
+              return console.log(`${err.message}`);
+            }
+            console.log(`회원정보가 저장되었습니다: ${id}`);
+          });
+          responseMessage.push('회원가입에 성공했습니다.');
+        }
+
+        res.header('Access-Control-Allow-Origin', '*');
+        res.send(JSON.stringify(`${responseMessage}`));
+  } else {
+        // ID가 중복되면 클라이언트에 ID가 중복된다는 사실을 공지
+        responseMessage.push('입력하신 ID는 이미 사용 중입니다.');
+        res.header('Access-Control-Allow-Origin', '*');
+        res.send(JSON.stringify(`${responseMessage}`));
+      }
+    });
+
+    db.close();
+  }
 
   // 로그인 요청
-  // ...
+  if(req.get('Request-Type') === 'Login Request') {
+    // ...
+  }
 });
 
 // 함수: 자릿수만큼 남은 앞부분을 0으로 채움
@@ -87,9 +151,9 @@ function fillZeroStart(width, str) {
   return str.length >= width ? str:new Array(width-str.length+1).join('0')+str;
 }
 
-// !!! 패스워드 암호화하기 (완성)
+// !!! 패스워드 암호화
 // const salt = await bcrypt.genSalt(10);
-// const hashed = await bcrypt.hash('12345678', salt);
+// const hashed = await bcrypt.hash(password, salt);
 // const bValidPassword = await bcrypt.compare('12345678', hashed);
 // if(!bValidPassword) {
 //   console.log('아이디/비밀번호가 올바르지 않습니다.');
@@ -98,6 +162,7 @@ function fillZeroStart(width, str) {
 //   console.log('정상입니다.');
 //   //return res.status(200).send('정상입니다.');
 // }
+
 
 // !!! JWT 생성하기
 // const SECRET_KEY = 'MY-SECRET-KEY';

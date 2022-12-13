@@ -36,22 +36,18 @@
             width: 50%;
         }
     </style>
-    <script>
-        // 확인 버튼 누를 경우
-            // 서버에 POST 요청 (요청 타입: Join), body에 회원 정보를 기입해서 전송
-            // 서버에서 먼저 id 중복 체크 --> 클라이언트에서 response 메시지 수신
-                // 중복시 실패 메시지 받고 화면에 오류 메시지 출력
-                // 중복 아니면 성공 메시지 수신 후 창 닫기
-            // ...
-    </script>
+    <script defer src="join.js"></script>
     <title>성경 뷰어 - 회원 가입</title>
 </head>
 <body>
     <div><label class="input_field" for="id">ID</label></div>
-    <div><input class="input_field" type="text" id="id" name="id" minlength="3" pattern="[0-9a-zA-Z_]{3,20}" required></div>
+    <div><input class="input_field" type="text" id="id" name="id" minlength="3" required></div>
 
     <div><label class="input_field" for="password">비밀번호</label></div>
     <div><input class="input_field" type="password" id="password" name="password" minlength="4" required></div>
+
+    <div><label class="input_field" for="password">비밀번호 다시 입력</label></div>
+    <div><input class="input_field" type="password" id="password_re" name="password_re" minlength="4" required></div>
 
     <div><label class="input_field" for="nickname">이름</label></div>
     <div><input class="input_field" type="text" id="nickname" name="nickname" required size="20"></div>
@@ -59,6 +55,6 @@
     <div><label class="input_field" for="email">이메일</label></div>
     <div><input class="input_field" type="email" id="email" name="email" size="20" required></div>
 
-    <div><br><input class="button" type="submit" value="확인"><input class="button" type="submit" value="취소"></div>
+    <div><br><input class="button" type="submit" value="확인" onclick="onConfirm();"><input class="button" type="submit" value="취소" onclick="window.close();"></div>
 </body>
 </html>
