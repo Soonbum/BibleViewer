@@ -7,6 +7,10 @@
   - 파일 구성은 다음과 같습니다.
   
     - index.html = 메인화면
+    
+    - join.html = 회원가입 화면
+    
+    - login.html = 로그인 화면
 
     - bible.js = 메인화면을 제어하는 스크립트
 
