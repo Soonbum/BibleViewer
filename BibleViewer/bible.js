@@ -1,3 +1,6 @@
+// 상수: 서버에 대한 정보
+const server_address = 'http://localhost:8001';     // 'http://bibleviewer.cafe24app.com';
+
 // 상수: 지원하는 역본 목록
 const version_name = {'korhkjv': '한글킹제임스흠정역', 'engkjv': '영어킹제임스(KJV)', 'korhrv': '한글개역성경'};
 
@@ -68,10 +71,6 @@ const book_info = [ ['창세기', '창', 50],
                     ['요한3서', '요삼', 1],
                     ['유다서', '유', 1],
                     ['요한계시록', '계', 22], ];
-
-// 상수: 서버에 대한 정보
-//const server_address = 'http://bibleviewer.cafe24app.com';
-const server_address = 'http://localhost:8001';
 
 // 함수: 현재 표시된 역본 목록 가져오기
 function versionList() {
@@ -540,3 +539,113 @@ async function showText() {
     saveStates();
 }
 showText();
+
+// 함수: 계정 관련 레이아웃
+function personalLayout() {
+    // 토큰이 존재할 경우 로그인된 상태로 취급
+    let join_button = document.querySelector('#join');
+    let login_button = document.querySelector('#login');
+    let logout_button = document.querySelector('#logout');
+    let modification_button = document.querySelector('#modification');
+
+    if(localStorage.getItem('token')) {
+        join_button.classList = 'display-none';
+        login_button.classList = 'display-none';
+        logout_button.classList = 'display-inline';
+        modification_button.classList = 'display-inline';
+    } else {
+        join_button.classList = 'display-inline';
+        login_button.classList = 'display-inline';
+        logout_button.classList = 'display-none';
+        modification_button.classList = 'display-none';
+    }
+}
+personalLayout();
+
+// 회원가입 - 확인 버튼 누를 경우
+async function onJoinConfirm() {
+    let id = document.querySelector('#id').value;
+    let password = document.querySelector('#password').value;
+    let password_re = document.querySelector('#password_re').value;
+    let nickname = document.querySelector('#nickname').value;
+    let email = document.querySelector('#email').value;
+
+    let bValidInformation = true;
+
+    // 비밀번호 다시 입력 체크
+    if(password !== password_re) {
+        alert('비밀번호를 다시 확인하십시오.');
+        let password_field = document.querySelector('#password');
+        let password_re_field = document.querySelector('#password_re');
+        password_field.value = ''
+        password_re_field.value = '';
+        bValidInformation = false;
+    }
+
+    // 입력한 정보가 유효하지 않으면 함수 중단
+    if(!bValidInformation) {
+        return;
+    }
+
+    const res = await fetch(`${server_address}/`, {
+        method: 'POST',
+        headers: {
+            'Request-Type': 'Join Request',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            id: `${id}`,
+            password: `${password}`,
+            nickname: `${nickname}`,
+            email: `${email}`,
+        }),
+    });
+    let inboundMessage = await res.json();
+    inboundMessage = inboundMessage.split(',');
+    let showMessage = '';
+    for(i=0 ; i<inboundMessage.length ; i++) {
+        showMessage += inboundMessage[i] + '\n';
+    }
+    alert(`${showMessage}`);
+
+    if(showMessage.includes('회원가입에 성공했습니다.') === true) {
+        window.close();
+    }
+}
+
+// 로그인 - 확인 버튼 누를 경우
+async function onLoginConfirm() {
+    let id = document.querySelector('#id').value;
+    let password = document.querySelector('#password').value;
+
+    const res = await fetch(`${server_address}/`, {
+        method: 'POST',
+        headers: {
+            'Request-Type': 'Login Request',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            id: `${id}`,
+            password: `${password}`,
+        }),
+    });
+    let inboundMessage = await res.json();
+
+    if(inboundMessage.code === 200) {
+        // 로그인에 성공하면 창 닫기
+        localStorage.setItem('token', inboundMessage.token);    // JWT 토큰 저장
+        window.location.reload(true);   // !!! 화면 새로고침이 안됨
+        window.close();
+    } else {
+        // 로그인에 실패하면 오류 메시지를 보여줌
+        alert(`${inboundMessage.message}`);
+    }
+}
+
+// 함수: 로그아웃 버튼
+function logOut() {
+    localStorage.removeItem('token');
+    personalLayout();
+}
+
+// ... 개인 데이터를 읽어올 때 토큰이 만료되었다는 메시지를 받게 되면 토큰을 삭제함

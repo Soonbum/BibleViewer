@@ -10,6 +10,8 @@ const jwt = require('jsonwebtoken');
 const sqlite3 = require('sqlite3');
 const { response } = require('express');
 
+require('dotenv').config();
+
 app.use(cors({origin: '*'}));
 app.use(express.json());
 
@@ -32,7 +34,7 @@ app.post('/', async (req, res) => {
 
   // 검색 요청 (버전, 키워드)
   if(req.get('Request-Type') === 'Search Results') {
-    console.log(`요청한 키워드: ${req.body.keyword}`);
+    console.log(`요청한 검색 키워드: ${req.body.keyword}`);
 
     // 요청 값 저장
     let keyword = req.body.keyword;
@@ -86,7 +88,7 @@ app.post('/', async (req, res) => {
     let email = req.body.email;
 
     // 개인정보를 저장하기 위한 DB 파일 생성
-    const db = new sqlite3.Database(`${__dirname}/userData.db`);
+    const db = new sqlite3.Database(`${__dirname}/personInfo.db`);
     let sql_stmt = '';
 
     // 패스워드 암호화
@@ -94,7 +96,7 @@ app.post('/', async (req, res) => {
     const hashed = await bcrypt.hash(password, salt);
 
     // 개인정보 테이블이 없으면 생성할 것
-    db.run('CREATE TABLE IF NOT EXISTS PersonInfo(id TEXT PRIMARY KEY, password TEXT, nickname TEXT, email TEXT);');
+    db.run('CREATE TABLE IF NOT EXISTS PersonInfo(id TEXT PRIMARY KEY, password TEXT, nickname TEXT, email TEXT, jwt TEXT);');
 
     // 클라이언트가 요청한 ID가 기존에 입력된 ID인지 체크 (중복 체크)
     let responseMessage = [];
@@ -117,12 +119,23 @@ app.post('/', async (req, res) => {
 
         // 개인정보가 유효할 경우 DB에 저장
         if(bValidPersonInfo === true) {
-          sql_stmt = `INSERT INTO PersonInfo(id, password, nickname, email) VALUES('${id}', '${hashed}', '${nickname}', '${email}');`
+          // JWT 생성하기
+          const SECRET_KEY = 'MY-SECRET-KEY';
+          const token = jwt.sign({
+            alg: 'HS256',
+            type: 'JWT',
+            id: id
+          }, SECRET_KEY, {
+            expiresIn: '6 hours',
+            issuer: '토큰발급자',
+          });
+
+          sql_stmt = `INSERT INTO PersonInfo(id, password, nickname, email, jwt) VALUES('${id}', '${hashed}', '${nickname}', '${email}', '${token}');`
           db.run(sql_stmt, (err) => {
             if(err) {
               return console.log(`${err.message}`);
             }
-            console.log(`회원정보가 저장되었습니다: ${id}`);
+            console.log(`회원정보가 저장되었습니다: ${id} / ${nickname} / ${email}`);
           });
           responseMessage.push('회원가입에 성공했습니다.');
         }
@@ -142,7 +155,66 @@ app.post('/', async (req, res) => {
 
   // 로그인 요청
   if(req.get('Request-Type') === 'Login Request') {
-    // ...
+    let id = req.body.id;
+    let password = req.body.password;
+
+    // 개인정보가 저장되어 있는 DB 파일
+    const db = new sqlite3.Database(`${__dirname}/personInfo.db`);
+    let record = [];
+    let bValidPassword = false;
+    let sql_stmt = '';
+
+    // ID와 비밀번호가 모두 일치할 경우 클라이언트에게 JWT 전송, 실패하면 클라이언트에게 오류 메시지 전송
+    sql_stmt = `SELECT * FROM PersonInfo WHERE id = '${id}'`;   // ID에 일치하는 레코드를 불러옴
+    db.all(sql_stmt, [], (err, rows) => {
+      if(err) {
+        return console.log(`${err.message}`);
+      }
+            
+      // 만약 비밀번호가 일치할 경우
+      if(rows.length === 1) {
+        bValidPassword = bcrypt.compareSync(password, rows[0].password);
+      }
+
+      if(bValidPassword === true) {
+        // JWT 업데이트
+        const SECRET_KEY = 'MY-SECRET-KEY';
+        const token = jwt.sign({
+          alg: 'HS256',
+          type: 'JWT',
+          id: id
+        }, SECRET_KEY, {
+          expiresIn: '6 hours',
+          issuer: '토큰발급자',
+        });
+
+        sql_stmt = `UPDATE PersonInfo SET jwt = '${token}' WHERE id = '${rows[0].id}'`;
+        db.run(sql_stmt, (err) => {
+          if(err) {
+            return console.error(err.message);
+          }
+        });
+
+        // 클라이언트에게 JWT 전송
+        return res.status(200).json({
+          code: 200,
+          message: '토큰이 새로 발급되었습니다.',
+          nickname: rows[0].nickname,
+          token: rows[0].jwt
+        });
+      }
+
+      // ID가 존재하지 않거나 비밀번호가 일치하지 않는 경우
+      if((rows.length === 0) || (bValidPassword === false)) {
+        // 클라이언트에게 오류 메시지 전송
+        return res.status(400).json({
+          code: 400,
+          message: '아이디/비밀번호가 올바르지 않습니다.'
+        });
+      }
+    });
+
+    db.close();
   }
 });
 
@@ -151,42 +223,14 @@ function fillZeroStart(width, str) {
   return str.length >= width ? str:new Array(width-str.length+1).join('0')+str;
 }
 
-// !!! 패스워드 암호화
-// const salt = await bcrypt.genSalt(10);
-// const hashed = await bcrypt.hash(password, salt);
-// const bValidPassword = await bcrypt.compare('12345678', hashed);
-// if(!bValidPassword) {
-//   console.log('아이디/비밀번호가 올바르지 않습니다.');
-//   //return res.status(400).send('아이디/비밀번호가 올바르지 않습니다.');
-// } else {
-//   console.log('정상입니다.');
-//   //return res.status(200).send('정상입니다.');
-// }
 
-
-// !!! JWT 생성하기
-// const SECRET_KEY = 'MY-SECRET-KEY';
-// const token = jwt.sign({
-//   alg: 'HS256',
-//   type: 'JWT',
-//   id: 'peacemaker84',
-//   nickname: '정순범',
-//   email: 'peacemaker84@gmail.com'
-// }, SECRET_KEY, {
-//   expiresIn: '6 hours',
-//   issuer: '토큰발급자',
-// });
-
+// 토큰 검증 (클라이언트 -> 서버)
 // const validateJWT = jwt.verify(token, SECRET_KEY);
 // console.log(validateJWT);
 
-// return res.status(200).json({
-//   code: 200,
-//   message: '토큰이 발급되었습니다.',
-//   token: token
-// });
 
 //res.header('x-auth-token', token).send({/* ... */});    // 서버 -> 클라이언트
+
 
 //const token = req.header('x-auth-token');   // 클라이언트 -> 서버
 //if(!token) return res.status(401).send('토큰이 없습니다.');
