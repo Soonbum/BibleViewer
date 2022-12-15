@@ -10,6 +10,8 @@
     
     - join.html = 회원가입 화면
     
+    - change.html = 개인정보 변경 및 탈퇴 화
+    
     - bible.js = 메인화면을 제어하는 스크립트
 
     - style.css = 메인화면을 꾸미는 스타일 정의 문서
