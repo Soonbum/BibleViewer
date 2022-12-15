@@ -10,8 +10,6 @@
     
     - join.html = 회원가입 화면
     
-    - login.html = 로그인 화면
-
     - bible.js = 메인화면을 제어하는 스크립트
 
     - style.css = 메인화면을 꾸미는 스타일 정의 문서
