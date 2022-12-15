@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken');
 const sqlite3 = require('sqlite3');
 const { response } = require('express');
 
-require('dotenv').config();
+const SECRET_KEY = 'MY-SECRET-KEY';
 
 app.use(cors({origin: '*'}));
 app.use(express.json());
@@ -120,7 +120,6 @@ app.post('/', async (req, res) => {
         // 개인정보가 유효할 경우 DB에 저장
         if(bValidPersonInfo === true) {
           // JWT 생성하기
-          const SECRET_KEY = 'MY-SECRET-KEY';
           const token = jwt.sign({
             alg: 'HS256',
             type: 'JWT',
@@ -142,7 +141,7 @@ app.post('/', async (req, res) => {
 
         res.header('Access-Control-Allow-Origin', '*');
         res.send(JSON.stringify(`${responseMessage}`));
-  } else {
+      } else {
         // ID가 중복되면 클라이언트에 ID가 중복된다는 사실을 공지
         responseMessage.push('입력하신 ID는 이미 사용 중입니다.');
         res.header('Access-Control-Allow-Origin', '*');
@@ -160,7 +159,6 @@ app.post('/', async (req, res) => {
 
     // 개인정보가 저장되어 있는 DB 파일
     const db = new sqlite3.Database(`${__dirname}/personInfo.db`);
-    let record = [];
     let bValidPassword = false;
     let sql_stmt = '';
 
@@ -178,7 +176,6 @@ app.post('/', async (req, res) => {
 
       if(bValidPassword === true) {
         // JWT 업데이트
-        const SECRET_KEY = 'MY-SECRET-KEY';
         const token = jwt.sign({
           alg: 'HS256',
           type: 'JWT',
@@ -200,6 +197,7 @@ app.post('/', async (req, res) => {
           code: 200,
           message: '토큰이 새로 발급되었습니다.',
           nickname: rows[0].nickname,
+          email: rows[0].email,
           token: rows[0].jwt
         });
       }
@@ -216,6 +214,79 @@ app.post('/', async (req, res) => {
 
     db.close();
   }
+
+  // 개인정보 변경 요청 !!!
+  if(req.get('Request-Type') === 'Change Request') {
+    let token = req.body.token;
+    let old_password = req.body.old_password;
+    let new_password = req.body.new_password;
+    let nickname = req.body.nickname;
+    let email = req.body.email;
+
+    // 패스워드 암호화
+    const salt = await bcrypt.genSalt(10);
+    const hashed = await bcrypt.hash(new_password, salt);
+
+    // 개인정보가 저장되어 있는 DB 파일
+    const db = new sqlite3.Database(`${__dirname}/personInfo.db`);
+    let bValidPassword = false;
+    let sql_stmt = '';
+
+    // 이메일 유효성 검사
+    if(!email.match('^[a-zA-Z0-9+-\_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')) {
+      // 이메일이 유효하지 않으면 실패 메시지 보냄
+      return res.status(400).json({
+        code: 400,
+        message: '이메일 주소가 유효하지 않습니다.'
+      });
+    }
+
+    try {
+      const validateJWT = jwt.verify(token, SECRET_KEY);
+      if(validateJWT) {
+        // 토큰이 유효하면 회원정보 변경 요청을 처리하고 성공 메시지 보냄
+        sql_stmt = `SELECT * FROM PersonInfo WHERE jwt = '${token}'`;
+        db.all(sql_stmt, [], (err, rows) => {
+          if(err) {
+            return console.log(`${err.message}`);
+          }
+
+          if(rows.length === 1) {
+            bValidPassword = bcrypt.compareSync(old_password, rows[0].password);
+          }
+
+          // 토큰과 동일한 레코드에 접근해서 정보를 업데이트
+          if(bValidPassword === true) {
+            sql_stmt = `UPDATE PersonInfo SET password = '${hashed}', nickname = '${nickname}', email = '${email}' WHERE jwt = '${token}'`;
+            db.run(sql.stmt, (err) => {
+              if(err) {
+                return console.error(err.message);
+              }
+            });
+
+            // 개인정보 변경에 성공했음을 알려줌
+            return res.status(200).json({
+              code: 200,
+              message: '개인정보 변경에 성공했습니다.'
+            });
+          }
+        });
+      }
+    } catch(e) {
+      // 토큰이 유효하지 않으면 실패 메시지 보냄
+      return res.status(400).json({
+        code: 400,
+        message: '토큰이 유효하지 않습니다.'
+      });
+    }
+  }
+
+  // 탈퇴 요청 !!!
+  if(req.get('Request-Type') === 'Leave Request') {
+    // ... 토큰 검증 필요
+    // ... token, old_password
+    // ... 성공하면 200, 실패하면 400 전송
+  }
 });
 
 // 함수: 자릿수만큼 남은 앞부분을 0으로 채움
@@ -224,13 +295,7 @@ function fillZeroStart(width, str) {
 }
 
 
-// 토큰 검증 (클라이언트 -> 서버)
-// const validateJWT = jwt.verify(token, SECRET_KEY);
-// console.log(validateJWT);
-
-
 //res.header('x-auth-token', token).send({/* ... */});    // 서버 -> 클라이언트
-
 
 //const token = req.header('x-auth-token');   // 클라이언트 -> 서버
 //if(!token) return res.status(401).send('토큰이 없습니다.');

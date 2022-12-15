@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=chrome">
+    <meta name="keywords" content="bible, 성경, 흠정역, 킹제임스">
+    <meta name="description" content="성경 뷰어 회원 가입 사이트입니다.">
+    <meta name="author" content="Soonbum Jeong">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        div {
+            display: block;
+            margin: 0.5em;
+        }
+
+        label {
+            padding: 1%;
+            font-size: larger;
+        }
+
+        input {
+            padding: 1%;
+            font-size: larger;
+        }
+
+        .input_field {
+            width: 98%;
+        }
+
+        .button {
+            width: 50%;
+        }
+
+        .button_full {
+            width: 100%;
+        }
+    </style>
+    <script defer src="bible.js"></script>
+    <title>성경 뷰어 - 개인정보 변경</title>
+</head>
+<body>
+    <div><label class="input_field" for="old_password">기존 비밀번호 (필수)</label></div>
+    <div><input class="input_field" type="password" id="old_password" name="old_password" minlength="4" required></div>
+
+    <div><label class="input_field" for="new_password">새 비밀번호 (변경시에만)</label></div>
+    <div><input class="input_field" type="password" id="new_password" name="new_password" minlength="4" required></div>
+
+    <div><label class="input_field" for="new_password">새 비밀번호 다시 입력 (변경시에만)</label></div>
+    <div><input class="input_field" type="password" id="new_password_re" name="new_password_re" minlength="4" required></div>
+
+    <div><label class="input_field" for="nickname">이름 (변경시에만)</label></div>
+    <div><input class="input_field" type="text" id="nickname" name="nickname" required size="20"></div>
+
+    <div><label class="input_field" for="email">이메일 (변경시에만)</label></div>
+    <div><input class="input_field" type="email" id="email" name="email" size="20" required></div>
+
+    <div><br><input class="button" type="submit" value="확인" onclick="onChangeConfirm();"><input class="button" type="submit" value="취소" onclick="window.close();"></div>
+
+    <div><br><input class="button_full" type="submit" value="탈퇴" onclick="onLeaveConfirm()"></div>
+</body>
+</html>

@@ -589,6 +589,16 @@ function onLogin() {
     }
 }
 
+// 함수: 로그아웃 버튼
+function onLogout() {
+    let welcome_message = document.querySelector('#welcome_message');
+    welcome_message.className = 'display-none';
+    welcome_message.innerHTML = ``;
+
+    localStorage.removeItem('token');
+    personalLayout();
+}
+
 // 회원가입 - 확인 버튼 누를 경우
 async function onJoinConfirm() {
     let id = document.querySelector('#id').value;
@@ -677,6 +687,10 @@ function onLoginConfirm() {
             password_field.className = 'display-none';
             confirm_button.className = 'display-none';
 
+            let welcome_message = document.querySelector('#welcome_message');
+            welcome_message.className = 'display-inline';
+            welcome_message.innerHTML = `${inboundMessage.nickname}님 (${inboundMessage.email}), 안녕하세요!`;
+
             personalLayout();
             document.addEventListener('keydown', checkKeyPressed, false);
         } else {
@@ -686,10 +700,78 @@ function onLoginConfirm() {
     });
 }
 
-// 함수: 로그아웃 버튼
-function logOut() {
-    localStorage.removeItem('token');
-    personalLayout();
+// 개인정보 변경 - 확인 버튼 누를 경우
+async function onChangeConfirm() {
+    let token = localStorage.getItem('token');
+    let old_password = document.querySelector('#old_password').value;
+    let new_password = document.querySelector('#new_password').value;
+    let new_password_re = document.querySelector('#new_password_re').value;
+    let nickname = document.querySelector('#nickname');
+    let email = document.querySelector('#email');
+
+    let bValidInformation = true;
+
+    // 새 비밀번호 다시 입력 체크
+    if(new_password !== new_password_re) {
+        alert('새 비밀번호를 다시 확인하십시오');
+        let new_password_field = document.querySelector('#new_password');
+        let new_password_re_field = document.querySelector('#new_password_re');
+        new_password_field.value = ''
+        new_password_re_field.value = '';
+        bValidInformation = false;
+    }
+
+    // 입력한 정보가 유효하지 않으면 함수 중단
+    if(!bValidInformation) {
+        return;
+    }
+    
+    const res = await fetch(`${server_address}/`, {
+        method: 'POST',
+        headers: {
+            'Request-Type': 'Change Request',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            token: `${token}`,
+            old_password: `${old_password}`,
+            new_password: `${new_password}`,
+            nickname: `${nickname}`,
+            email: `${email}`,
+        }),
+    });
+    let inboundMessage = await res.json();
+
+    if(inboundMessage.code === 200) {
+        alert(`회원정보 변경을 성공했습니다.`);
+    } else {
+        alert(`회원정보 변경에 실패했습니다. 로그아웃 후 다시 로그인하셨다가 재시도하십시오. ${inboundMessage.message}`);
+    }
+}
+
+// 개인정보 변경 - 탈퇴 버튼 누를 경우
+async function onLeaveConfirm() {
+    let token = localStorage.getItem('token');
+    let old_password = document.querySelector('#old_password').value;
+
+    const res = await fetch(`${server_address}/`, {
+        method: 'POST',
+        headers: {
+            'Request-Type': 'Leave Request',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            token: `${token}`,
+            old_password: `${old_password}`,
+        }),
+    });
+    let inboundMessage = await res.json();
+
+    if(inboundMessage.code === 200) {
+        alert(`회원 탈퇴를 성공했습니다.`);
+    } else {
+        alert(`회원 탈퇴에 실패했습니다. 로그아웃 후 다시 로그인하셨다가 재시도하십시오. ${inboundMessage.message}`);
+    }
 }
 
 // ... 개인 데이터를 읽어올 때 토큰이 만료되었다는 메시지를 받게 되면 토큰을 삭제함
