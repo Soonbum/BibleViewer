@@ -198,7 +198,7 @@ app.post('/', async (req, res) => {
           message: '토큰이 새로 발급되었습니다.',
           nickname: rows[0].nickname,
           email: rows[0].email,
-          token: rows[0].jwt
+          token: token
         });
       }
 
@@ -215,7 +215,7 @@ app.post('/', async (req, res) => {
     db.close();
   }
 
-  // 개인정보 변경 요청 !!!
+  // 개인정보 변경 요청
   if(req.get('Request-Type') === 'Change Request') {
     let token = req.body.token;
     let old_password = req.body.old_password;
@@ -258,7 +258,7 @@ app.post('/', async (req, res) => {
           // 토큰과 동일한 레코드에 접근해서 정보를 업데이트
           if(bValidPassword === true) {
             sql_stmt = `UPDATE PersonInfo SET password = '${hashed}', nickname = '${nickname}', email = '${email}' WHERE jwt = '${token}'`;
-            db.run(sql.stmt, (err) => {
+            db.run(sql_stmt, (err) => {
               if(err) {
                 return console.error(err.message);
               }
@@ -271,21 +271,84 @@ app.post('/', async (req, res) => {
             });
           }
         });
+
+        db.close();
       }
-    } catch(e) {
+    } catch(error) {
       // 토큰이 유효하지 않으면 실패 메시지 보냄
-      return res.status(400).json({
-        code: 400,
-        message: '토큰이 유효하지 않습니다.'
-      });
+      if(error.name === 'TokenExpiredError') {
+        return res.status(419).json({
+          code: 419,
+          message: '토큰이 만료되었습니다.'
+        });
+      }
+      if(error.name === 'JsonWebTokenError') {
+        return res.status(401).json({
+          code: 401,
+          message: '토큰이 유효하지 않습니다.'
+        });
+      }
     }
   }
 
-  // 탈퇴 요청 !!!
+  // 탈퇴 요청
   if(req.get('Request-Type') === 'Leave Request') {
-    // ... 토큰 검증 필요
-    // ... token, old_password
-    // ... 성공하면 200, 실패하면 400 전송
+    let token = req.body.token;
+    let old_password = req.body.old_password;
+
+    // 개인정보가 저장되어 있는 DB 파일
+    const db = new sqlite3.Database(`${__dirname}/personInfo.db`);
+    let bValidPassword = false;
+    let sql_stmt = '';
+
+    try {
+      const validateJWT = jwt.verify(token, SECRET_KEY);
+      if(validateJWT) {
+        // 토큰이 유효하면 탈퇴 요청을 처리하고 성공 메시지 보냄
+        sql_stmt = `SELECT * FROM PersonInfo WHERE jwt = '${token}'`;
+        db.all(sql_stmt, [], (err, rows) => {
+          if(err) {
+            return console.log(`${err.message}`);
+          }
+
+          if(rows.length === 1) {
+            bValidPassword = bcrypt.compareSync(old_password, rows[0].password);
+          }
+
+          // 토큰과 동일한 레코드에 접근해서 정보를 삭제
+          if(bValidPassword === true) {
+            sql_stmt = `DELETE FROM PersonInfo WHERE jwt = '${token}'`;
+            db.run(sql_stmt, (err) => {
+              if(err) {
+                return console.error(err.message);
+              }
+            });
+
+            // 탈퇴에 성공했음을 알려줌
+            return res.status(200).json({
+              code: 200,
+              message: '탈퇴에 성공했습니다.'
+            });
+          }
+        });
+
+        db.close();
+      }
+    } catch(error) {
+      // 토큰이 유효하지 않으면 실패 메시지 보냄
+      if(error.name === 'TokenExpiredError') {
+        return res.status(419).json({
+          code: 419,
+          message: '토큰이 만료되었습니다.'
+        });
+      }
+      if(error.name === 'JsonWebTokenError') {
+        return res.status(401).json({
+          code: 401,
+          message: '토큰이 유효하지 않습니다.'
+        });
+      }
+    }
   }
 });
 
@@ -293,36 +356,3 @@ app.post('/', async (req, res) => {
 function fillZeroStart(width, str) {
   return str.length >= width ? str:new Array(width-str.length+1).join('0')+str;
 }
-
-
-//res.header('x-auth-token', token).send({/* ... */});    // 서버 -> 클라이언트
-
-//const token = req.header('x-auth-token');   // 클라이언트 -> 서버
-//if(!token) return res.status(401).send('토큰이 없습니다.');
-// try {
-//   const decoded = jwt.verify(token, SECRET_KEY);
-//   const id = decoded.id;
-//   const nickname = decoded.nickname;
-//   const email = decoded.email;
-//   return res.status(200).json({
-//     code: 200,
-//     message: '토큰은 정상입니다.',
-//     data: {
-//       nickname: nickname,
-//       email: email
-//     }
-//   });
-// } catch(error) {
-//   if(error.name === 'TokenExpiredError') {
-//     return res.status(419).json({
-//       code: 419,
-//       message: '토큰이 만료되었습니다.'
-//     });
-//   }
-//   if(error.name === 'JsonWebTokenError') {
-//     return res.status(401).json({
-//       code: 401,
-//       message: '유효하지 않은 토큰입니다.';
-//     });
-//   }
-// }

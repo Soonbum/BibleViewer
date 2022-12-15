@@ -706,8 +706,8 @@ async function onChangeConfirm() {
     let old_password = document.querySelector('#old_password').value;
     let new_password = document.querySelector('#new_password').value;
     let new_password_re = document.querySelector('#new_password_re').value;
-    let nickname = document.querySelector('#nickname');
-    let email = document.querySelector('#email');
+    let nickname = document.querySelector('#nickname').value;
+    let email = document.querySelector('#email').value;
 
     let bValidInformation = true;
 
@@ -744,8 +744,10 @@ async function onChangeConfirm() {
 
     if(inboundMessage.code === 200) {
         alert(`회원정보 변경을 성공했습니다.`);
+        window.close();
     } else {
-        alert(`회원정보 변경에 실패했습니다. 로그아웃 후 다시 로그인하셨다가 재시도하십시오. ${inboundMessage.message}`);
+        alert(`회원정보 변경에 실패했습니다.\n로그아웃 후 다시 로그인하셨다가 재시도하십시오.\n${inboundMessage.message}`);
+        window.close();
     }
 }
 
@@ -769,8 +771,10 @@ async function onLeaveConfirm() {
 
     if(inboundMessage.code === 200) {
         alert(`회원 탈퇴를 성공했습니다.`);
+        window.close();
     } else {
-        alert(`회원 탈퇴에 실패했습니다. 로그아웃 후 다시 로그인하셨다가 재시도하십시오. ${inboundMessage.message}`);
+        alert(`회원 탈퇴에 실패했습니다.\n로그아웃 후 다시 로그인하셨다가 재시도하십시오.\n${inboundMessage.message}`);
+        window.close();
     }
 }
 

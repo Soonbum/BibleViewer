@@ -44,22 +44,22 @@
     <title>성경 뷰어 - 개인정보 변경</title>
 </head>
 <body>
-    <div><label class="input_field" for="old_password">기존 비밀번호 (필수)</label></div>
+    <div><label class="input_field" for="old_password">기존 비밀번호 (변경/탈퇴시 필수)</label></div>
     <div><input class="input_field" type="password" id="old_password" name="old_password" minlength="4" required></div>
 
-    <div><label class="input_field" for="new_password">새 비밀번호 (변경시에만)</label></div>
+    <div><label class="input_field" for="new_password">새 비밀번호 (변경시 필수)</label></div>
     <div><input class="input_field" type="password" id="new_password" name="new_password" minlength="4" required></div>
 
-    <div><label class="input_field" for="new_password">새 비밀번호 다시 입력 (변경시에만)</label></div>
+    <div><label class="input_field" for="new_password">새 비밀번호 다시 입력 (변경시 필수)</label></div>
     <div><input class="input_field" type="password" id="new_password_re" name="new_password_re" minlength="4" required></div>
 
-    <div><label class="input_field" for="nickname">이름 (변경시에만)</label></div>
+    <div><label class="input_field" for="nickname">이름 (변경시 필수)</label></div>
     <div><input class="input_field" type="text" id="nickname" name="nickname" required size="20"></div>
 
-    <div><label class="input_field" for="email">이메일 (변경시에만)</label></div>
+    <div><label class="input_field" for="email">이메일 (변경시 필수)</label></div>
     <div><input class="input_field" type="email" id="email" name="email" size="20" required></div>
 
-    <div><br><input class="button" type="submit" value="확인" onclick="onChangeConfirm();"><input class="button" type="submit" value="취소" onclick="window.close();"></div>
+    <div><br><input class="button" type="submit" value="변경" onclick="onChangeConfirm();"><input class="button" type="submit" value="취소" onclick="window.close();"></div>
 
     <div><br><input class="button_full" type="submit" value="탈퇴" onclick="onLeaveConfirm()"></div>
 </body>
