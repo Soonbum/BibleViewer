@@ -4,12 +4,11 @@ html, body {
 
 #version_section {
     margin: 1em;
-    display: inline;
+    display: block;
 }
 #membership_section {
-    margin: 0em;
+    margin: 1em;
     display: inline;
-    float: right;
 }
 #search_section {
     text-align: center;

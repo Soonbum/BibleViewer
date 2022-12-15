@@ -562,6 +562,33 @@ function personalLayout() {
 }
 personalLayout();
 
+// 로그인 버튼 누를 경우
+function onLogin() {
+    let id_label = document.querySelector('#id_label');
+    let id_field = document.querySelector('#id');
+    let password_label = document.querySelector('#password_label');
+    let password_field = document.querySelector('#password');
+    let confirm_button = document.querySelector('#confirm_button');
+
+    if(id_label.className === 'display-none') {
+        id_label.className = 'display-inline';
+        id_field.className = 'display-inline';
+        password_label.className = 'display-inline';
+        password_field.className = 'display-inline';
+        confirm_button.className = 'display-inline';
+
+        document.removeEventListener('keydown', checkKeyPressed);
+    } else {
+        id_label.className = 'display-none';
+        id_field.className = 'display-none';
+        password_label.className = 'display-none';
+        password_field.className = 'display-none';
+        confirm_button.className = 'display-none';
+
+        document.addEventListener('keydown', checkKeyPressed, false);
+    }
+}
+
 // 회원가입 - 확인 버튼 누를 경우
 async function onJoinConfirm() {
     let id = document.querySelector('#id').value;
@@ -614,11 +641,11 @@ async function onJoinConfirm() {
 }
 
 // 로그인 - 확인 버튼 누를 경우
-async function onLoginConfirm() {
+function onLoginConfirm() {
     let id = document.querySelector('#id').value;
     let password = document.querySelector('#password').value;
 
-    const res = await fetch(`${server_address}/`, {
+    fetch(`${server_address}/`, {
         method: 'POST',
         headers: {
             'Request-Type': 'Login Request',
@@ -627,19 +654,36 @@ async function onLoginConfirm() {
         body: JSON.stringify({
             id: `${id}`,
             password: `${password}`,
-        }),
-    });
-    let inboundMessage = await res.json();
+        })
+    }).then(response => {
+        return response.json();
+    }).then(inboundMessage => {
+        if(inboundMessage.code === 200) {
+            // 로그인에 성공하면 입력 필드 숨기기
+            localStorage.setItem('token', inboundMessage.token);    // JWT 토큰 저장
 
-    if(inboundMessage.code === 200) {
-        // 로그인에 성공하면 창 닫기
-        localStorage.setItem('token', inboundMessage.token);    // JWT 토큰 저장
-        window.location.reload(true);   // !!! 화면 새로고침이 안됨
-        window.close();
-    } else {
-        // 로그인에 실패하면 오류 메시지를 보여줌
-        alert(`${inboundMessage.message}`);
-    }
+            let id_label = document.querySelector('#id_label');
+            let id_field = document.querySelector('#id');
+            let password_label = document.querySelector('#password_label');
+            let password_field = document.querySelector('#password');
+            let confirm_button = document.querySelector('#confirm_button');
+
+            id_field.value = '';
+            password_field.value = '';
+
+            id_label.className = 'display-none';
+            id_field.className = 'display-none';
+            password_label.className = 'display-none';
+            password_field.className = 'display-none';
+            confirm_button.className = 'display-none';
+
+            personalLayout();
+            document.addEventListener('keydown', checkKeyPressed, false);
+        } else {
+            // 로그인에 실패하면 오류 메시지를 보여줌
+            alert(`${inboundMessage.message}`);
+        }
+    });
 }
 
 // 함수: 로그아웃 버튼
