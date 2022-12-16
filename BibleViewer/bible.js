@@ -520,9 +520,9 @@ async function showText() {
 
                 // 1번째 공백을 기준으로 처음 나오는 절 번호에 컬러값 부여
                 let spacePos = inboundText[j].indexOf(' ');
-                let statement = '<p style="display:inline; color:#FB7A01;">' + inboundText[j].substr(0, spacePos) + '</p>' + inboundText[j].substr(spacePos, inboundText[j].length);
+                let statement = '<div class="text-line"><p style="display:inline; color:#FB7A01;">' + inboundText[j].substr(0, spacePos) + '</p>' + inboundText[j].substr(spacePos, inboundText[j].length) + '</div>';
 
-                bodyText += statement + '<br>';
+                bodyText += statement;
                 horizontalLineCount++;
 
                 // 5절씩 끊기
@@ -539,6 +539,21 @@ async function showText() {
     saveStates();
 }
 showText();
+
+// 함수: 클릭한 절 하이라이트 표시하기
+function verseHighlighting() {
+    window.onclick = (ev) => {
+        let elem = ev.target;
+        if(elem.className === 'text-line') {
+            if(elem.style.backgroundColor === "rgb(204, 204, 204)") {
+                elem.style.backgroundColor = "rgb(255, 255, 255)";
+            } else {
+                elem.style.backgroundColor = "rgb(204, 204, 204)";
+            }
+        }
+    }
+}
+verseHighlighting();
 
 // 함수: 계정 관련 레이아웃
 function personalLayout() {

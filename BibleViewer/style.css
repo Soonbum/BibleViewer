@@ -101,6 +101,11 @@ html, body {
     vertical-align: top;
 }
 
+.text-line {
+    padding: 0.3em 0;
+    background-color: #fff;
+}
+
 /* 검색 결과 관련 컨텐츠 */
 #special_button_section {
     position: relative;
