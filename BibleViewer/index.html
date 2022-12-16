@@ -17,9 +17,10 @@
         <button id="login" class="display-inline" onclick="onLogin()">로그인</button>
         <button id="logout" class="display-none" onclick="onLogout()">로그아웃</button>
         <button id="modification" class="display-none" onclick="window.open('change.html','개인정보 변경','width=500px, height=650px');">개인정보 변경</button>
-
+        <br>
         <label class="display-none" for="id" id="id_label">ID</label>
         <input class="display-none" type="text" id="id" name="id" minlength="3" required>
+        <br>
         <label class="display-none" for="password" id="password_label">비밀번호</label>
         <input class="display-none" type="password" id="password" name="password" minlength="4" required>
         <input class="display-none" type="submit" value="확인" id="confirm_button" onclick="onLoginConfirm();">

@@ -1,5 +1,6 @@
 // 상수: 서버에 대한 정보
-const server_address = 'http://localhost:8001';     // 'http://bibleviewer.cafe24app.com';
+//const server_address = 'http://bibleviewer.cafe24app.com';
+const server_address = 'http://localhost:8001';
 
 // 상수: 지원하는 역본 목록
 const version_name = {'korhkjv': '한글킹제임스흠정역', 'engkjv': '영어킹제임스(KJV)', 'korhrv': '한글개역성경'};
