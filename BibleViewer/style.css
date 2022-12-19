@@ -18,6 +18,9 @@ html, body {
     text-align: center;
     margin: 1em;
 }
+#bookmark_section {
+    margin: 1em;
+}
 #book_buttons {
     margin: 1em 0em 1em 10em;
 }
@@ -63,6 +66,16 @@ html, body {
 }
 #next_book {
     width: 2em;
+    height: 3em;
+    vertical-align: top;
+}
+#listen {
+    width: 4em;
+    height: 3em;
+    vertical-align: top;
+}
+#stop {
+    width: 4em;
     height: 3em;
     vertical-align: top;
 }

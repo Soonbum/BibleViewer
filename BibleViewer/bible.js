@@ -461,6 +461,28 @@ next_chapter_button.addEventListener('click', nextChapter);
 let next_book_button = document.querySelector('#next_book');
 next_book_button.addEventListener('click', nextBook);
 
+// 듣기 버튼
+let listen_button = document.querySelector('#listen');
+listen_button.addEventListener('click', () => {
+    if(!window.speechSynthesis) {
+        alert('음성 재생을 지원하지 않는 브라우저입니다.');
+        return;
+    }
+    let text_panels = document.querySelectorAll('#bodyText');
+    
+    // 맨 앞의 절 번호, 괄호, 한자는 제거함, div, br 태그도 제거함
+    let text_to_speech = text_panels[0].innerHTML.replace(/<p(.*?)>(.*?)<\/p>/gm, '').replace(/[\(\)\[\]{}一-龥]*/gm, '').replace(/<div class="text-line">/gm, '').replace(/<\/div>/gm, '').replace(/<br>/gm, '');
+    u = new SpeechSynthesisUtterance(text_to_speech);
+    u.lang = 'ko-KR';
+    window.speechSynthesis.speak(u);
+});
+
+// 정지 버튼
+let stop_button = document.querySelector('#stop');
+stop_button.addEventListener('click', () => {
+    window.speechSynthesis.cancel();
+});
+
 // 함수: 본문 보여주기
 async function showText() {
     // 현재 선택한 책, 장 알아내기
