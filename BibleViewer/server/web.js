@@ -223,14 +223,12 @@ app.post('/', async (req, res) => {
     let nickname = req.body.nickname;
     let email = req.body.email;
 
+    let bValidPassword = false;
+    let sql_stmt = '';
+
     // 패스워드 암호화
     const salt = await bcrypt.genSalt(10);
     const hashed = await bcrypt.hash(new_password, salt);
-
-    // 개인정보가 저장되어 있는 DB 파일
-    const db = new sqlite3.Database(`${__dirname}/personInfo.db`);
-    let bValidPassword = false;
-    let sql_stmt = '';
 
     // 이메일 유효성 검사
     if(!email.match('^[a-zA-Z0-9+-\_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')) {
@@ -244,6 +242,9 @@ app.post('/', async (req, res) => {
     try {
       const validateJWT = jwt.verify(token, SECRET_KEY);
       if(validateJWT) {
+        // 개인정보가 저장되어 있는 DB 파일
+        const db = new sqlite3.Database(`${__dirname}/personInfo.db`);
+        
         // 토큰이 유효하면 회원정보 변경 요청을 처리하고 성공 메시지 보냄
         sql_stmt = `SELECT * FROM PersonInfo WHERE jwt = '${token}'`;
         db.all(sql_stmt, [], (err, rows) => {
@@ -296,14 +297,15 @@ app.post('/', async (req, res) => {
     let token = req.body.token;
     let old_password = req.body.old_password;
 
-    // 개인정보가 저장되어 있는 DB 파일
-    const db = new sqlite3.Database(`${__dirname}/personInfo.db`);
     let bValidPassword = false;
     let sql_stmt = '';
 
     try {
       const validateJWT = jwt.verify(token, SECRET_KEY);
       if(validateJWT) {
+        // 개인정보가 저장되어 있는 DB 파일
+        const db = new sqlite3.Database(`${__dirname}/personInfo.db`);
+        
         // 토큰이 유효하면 탈퇴 요청을 처리하고 성공 메시지 보냄
         sql_stmt = `SELECT * FROM PersonInfo WHERE jwt = '${token}'`;
         db.all(sql_stmt, [], (err, rows) => {
@@ -333,6 +335,69 @@ app.post('/', async (req, res) => {
         });
 
         db.close();
+      }
+    } catch(error) {
+      // 토큰이 유효하지 않으면 실패 메시지 보냄
+      if(error.name === 'TokenExpiredError') {
+        return res.status(419).json({
+          code: 419,
+          message: '토큰이 만료되었습니다.'
+        });
+      }
+      if(error.name === 'JsonWebTokenError') {
+        return res.status(401).json({
+          code: 401,
+          message: '토큰이 유효하지 않습니다.'
+        });
+      }
+    }
+  }
+
+  // 책갈피 추가 요청
+  if(req.get('Request-Type') === 'Bookmark Add Request') {
+    let token = req.body.token;
+    let location_text = fillZeroStart(2, `${req.body.book_index}`) + '_' + `${req.body.chapter_index}`;
+    let tag_name = req.body.tag_name;
+
+    let id = '';
+    let sql_stmt = '';
+
+    try {
+      const validateJWT = wt.verify(token, SECRET_KEY);
+      if(validateJWT) {
+        // 개인정보가 저장되어 있는 DB 파일
+        let db = new sqlite3.Database(`${__dirname}/personInfo.db`);
+
+        // 토큰에 해당하는 ID를 찾음
+        sql_stmt = `SELECT * FROM PersonInfo WHERE jwt = '${token}'`;
+        db.all(sql_stmt, [], (err, rows) => {
+          if(err) {
+            return console.log(`${err.message}`);
+          }
+
+          if(rows.length === 1) {
+            id = rows[0].id;
+          }
+        });
+        db.close();
+
+        // 북마크 정보를 저장하기 위한 DB 파일 생성
+        db = new sqlite3.Database(`${__dirname}/bookmarkInfo.db`);
+
+        // 북마크 정보 테이블이 없으면 생성할 것
+        db.run('CREATE TABLE IF NOT EXISTS BookmarkInfo(id TEXT PRIMARY KEY, location TEXT, tag_name TEXT);');
+
+        // 북마크 정보 테이블에 책갈피를 추가함
+        sql_stmt = `INSERT INTO BookmarkInfo(id, location, tag_name) VALUES('${id}', '${location_text}', '${tag_name}');`
+        db.run(sql_stmt, (err) => {
+          if(err) {
+            return console.log(`${err.message}`);
+          }
+        });
+
+        db.close();
+
+        // ... 성공 -> 클라이언트에게 보냄 (위치 정보, 태그 이름)
       }
     } catch(error) {
       // 토큰이 유효하지 않으면 실패 메시지 보냄

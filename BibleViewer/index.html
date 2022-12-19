@@ -65,8 +65,9 @@
         <button id="next_book" class="tooltip">&gt;&gt;
             <span class="tooltiptext tooltip-bottom">다음 책 (r)</span>
         </button>
-        <button id="listen">듣기</button>
-        <button id="stop">정지</button>
+        <button id="listen">&#9654;</button> <!-- 재생 -->
+        <button id="stop">&#11035;</button> <!-- 정지 -->
+        <button id="pause">&#10074;&#10074;</button> <!-- 일시정지 -->
     </div>
 
     <div id="book_buttons" class="display-none">
@@ -344,18 +345,7 @@
     </div>
     
     <div id="bookmark_section">
-        <button id="bookmark">책갈피</button>
-        <!-- 알고리즘 -->
-        <!-- 1. 버튼은 처음부터 존재하지 않음 -->
-        <!-- 2. 토큰이 있을 경우 DB에 접근해서 ID를 찾고, 그 ID를 이용해 책갈피 데이터를 가져온다. -->
-            <!-- 3. 책갈피 데이터를 수신하게 되면 순서대로 버튼을 만든다. -->
-        <!-- 4. 마지막에는 무조건 책갈피 추가 버튼을 생성한다. -->
-        <!-- 5. 책갈피 버튼마다 이벤트를 부착한다. -->
-        <!-- 6. 기존 책갈피 버튼의 경우 -->
-            <!-- 싱글클릭: 해당 장으로 바로 이동함 -->
-            <!-- 더블클릭: 책갈피 삭제 -->
-        <!-- 7. 책갈피 추가 버튼의 경우 -->
-            <!-- prompt 창을 띄워서 태그를 입력하고 확인을 누르면 DB에 저장되고 버튼도 재구성됨 -->
+        <button id="bookmark_add">책갈피 추가</button>
     </div>
 
     <div id="contents_section" style="display: flex; flex-wrap: nowrap; flex-flow: row; height: 100%; vertical-align: top;">

@@ -468,19 +468,30 @@ listen_button.addEventListener('click', () => {
         alert('음성 재생을 지원하지 않는 브라우저입니다.');
         return;
     }
-    let text_panels = document.querySelectorAll('#bodyText');
+
+    if(window.speechSynthesis.paused === false) {
+        let text_panels = document.querySelectorAll('#bodyText');
     
-    // 맨 앞의 절 번호, 괄호, 한자는 제거함, div, br 태그도 제거함
-    let text_to_speech = text_panels[0].innerHTML.replace(/<p(.*?)>(.*?)<\/p>/gm, '').replace(/[\(\)\[\]{}一-龥]*/gm, '').replace(/<div class="text-line">/gm, '').replace(/<\/div>/gm, '').replace(/<br>/gm, '');
-    u = new SpeechSynthesisUtterance(text_to_speech);
-    u.lang = 'ko-KR';
-    window.speechSynthesis.speak(u);
+        // 맨 앞의 절 번호, 괄호, 한자는 제거함, div, br 태그도 제거함
+        let text_to_speech = text_panels[0].innerHTML.replace(/<p(.*?)>(.*?)<\/p>/gm, '').replace(/[\(\)\[\]{}一-龥]*/gm, '').replace(/<div class="text-line">/gm, '').replace(/<\/div>/gm, '').replace(/<br>/gm, '');
+        u = new SpeechSynthesisUtterance(text_to_speech);
+        u.lang = 'ko-KR';
+        window.speechSynthesis.speak(u);
+    } else {
+        window.speechSynthesis.resume();
+    }
 });
 
 // 정지 버튼
 let stop_button = document.querySelector('#stop');
 stop_button.addEventListener('click', () => {
     window.speechSynthesis.cancel();
+});
+
+// 일시정지 버튼
+let pause_button = document.querySelector('#pause');
+pause_button.addEventListener('click', () => {
+    window.speechSynthesis.pause();
 });
 
 // 함수: 본문 보여주기
@@ -814,6 +825,79 @@ async function onLeaveConfirm() {
         alert(`회원 탈퇴에 실패했습니다.\n로그아웃 후 다시 로그인하셨다가 재시도하십시오.\n${inboundMessage.message}`);
         window.close();
     }
+}
+
+// 기존 책갈피 표시
+// ...
+function showBookmarks() {
+    // token을 서버로 전송 --> 서버에서는 로그인한 ID가 가진 북마크 정보를 모두 가져옴
+    // token이 유효하지 않으면?
+    // 가져온 북마크 정보를 기반으로 북마크 버튼을 배치함
+}
+showBookmarks();
+
+// 책갈피 추가 버튼 클릭할 경우
+// ...
+async function addBookmark() {
+    // prompt 창에서 책갈피 이름 입력 받음
+    let tag_name = prompt('책갈피 이름을 입력하십시오.');
+
+    // 토큰, 현재 책/장, 책갈피 이름을 서버에 전송
+    let token = localStorage.getItem('token');
+    let current_book_index = 0;
+    let current_chapter_index = 0;
+
+    // 책 순번: 01부터 66까지
+    const current_book_name = document.querySelector('current_book').innerHTML;
+    for(i=0 ; i<book_info.length ; i++) {
+        if(book_info[i][0] === current_book_name) {
+            current_book_index = i+1;
+            break;
+        }
+    }
+
+    // 장 순번: 1부터 150까지
+    const current_chapter_number = document.querySelector('current_chapter').innerHTML;
+    current_chapter_index = parseInt(current_chapter_number);
+
+    const res = await fetch(`${server_address}/`, {
+        method: 'POST',
+        headers: {
+            'Request-Type': 'Bookmark Add Request',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            token: `${token}`,
+            book_index: `${current_book_index}`,
+            chapter_index: `${current_chapter_index}`,
+            tag_name: `${tag_name}`,
+        }),
+    });
+    let inboundMessage = await res.json();
+
+    // ... token, 현재 책, 현재 장, 책갈피 이름을 서버로 전송 -> 서버에서는 DB에 책갈피 정보를 저장한다.
+    // ... token이 유효하지 않으면?
+
+    if(inboundMessage.code === 200) {
+        //alert(`회원 탈퇴를 성공했습니다.`);
+        window.close();
+    } else {
+        //alert(`회원 탈퇴에 실패했습니다.\n로그아웃 후 다시 로그인하셨다가 재시도하십시오.\n${inboundMessage.message}`);
+        window.close();
+    }
+}
+
+// 기존 책갈피 싱글-클릭할 경우
+// ... 해당 장으로 이동
+function moveBookmark() {
+    // 북마크에 표시된 책, 장으로 이동
+}
+
+// 기존 책갈피 더블-클릭할 경우
+// ... 책갈피 삭제
+function deleteBookmark() {
+    // token과 선택한 버튼에 대한 북마크 정보를 서버에 전송 -> 서버에서는 DB에서 해당 책갈피 정보를 제거한다.
+    // token이 유효하지 않으면?
 }
 
 // ... 개인 데이터를 읽어올 때 토큰이 만료되었다는 메시지를 받게 되면 토큰을 삭제함

@@ -79,6 +79,11 @@ html, body {
     height: 3em;
     vertical-align: top;
 }
+#pause {
+    width: 4em;
+    height: 3em;
+    vertical-align: top;
+}
 
 #book_buttons {
     position: absolute;
