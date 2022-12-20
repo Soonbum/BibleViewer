@@ -574,20 +574,23 @@ async function showText() {
 }
 showText();
 
-// 함수: 클릭한 절 하이라이트 표시하기
-function verseHighlighting() {
+// 함수: 본문 하이라이트
+function textHighting() {
     window.onclick = (ev) => {
-        let elem = ev.target;
-        if(elem.className === 'text-line') {
-            if(elem.style.backgroundColor === "rgb(204, 204, 204)") {
-                elem.style.backgroundColor = "rgb(255, 255, 255)";
-            } else {
-                elem.style.backgroundColor = "rgb(204, 204, 204)";
+        // 본문 텍스트를 클릭할 경우
+        if(ev.target.tagName === 'DIV' && ev.target.className === 'text-line') {
+            let elem = ev.target;
+            if(elem.className === 'text-line') {
+                if(elem.style.backgroundColor === "rgb(204, 204, 204)") {
+                    elem.style.backgroundColor = "rgb(255, 255, 255)";
+                } else {
+                    elem.style.backgroundColor = "rgb(204, 204, 204)";
+                }
             }
         }
     }
 }
-verseHighlighting();
+textHighting();
 
 // 함수: 계정 관련 레이아웃
 function personalLayout() {
@@ -827,38 +830,25 @@ async function onLeaveConfirm() {
     }
 }
 
-// 기존 책갈피 표시
+// 책갈피 가져오기
 // ...
-function showBookmarks() {
-    // token을 서버로 전송 --> 서버에서는 로그인한 ID가 가진 북마크 정보를 모두 가져옴
-    // token이 유효하지 않으면?
-    // 가져온 북마크 정보를 기반으로 북마크 버튼을 배치함
+function getBookmarksFromServer() {
+    // ... localStorage에서 기존 북마크 삭제함
+    // ... 서버에서 북마크 정보 다 가져와서 localStorage에 저장함
 }
-showBookmarks();
 
 // 책갈피 추가 버튼 클릭할 경우
-// ...
 async function addBookmark() {
     // prompt 창에서 책갈피 이름 입력 받음
     let tag_name = prompt('책갈피 이름을 입력하십시오.');
-
-    // 토큰, 현재 책/장, 책갈피 이름을 서버에 전송
-    let token = localStorage.getItem('token');
-    let current_book_index = 0;
-    let current_chapter_index = 0;
-
-    // 책 순번: 01부터 66까지
-    const current_book_name = document.querySelector('current_book').innerHTML;
-    for(i=0 ; i<book_info.length ; i++) {
-        if(book_info[i][0] === current_book_name) {
-            current_book_index = i+1;
-            break;
-        }
+    if(tag_name === null) {
+        tag_name = '';
     }
 
-    // 장 순번: 1부터 150까지
-    const current_chapter_number = document.querySelector('current_chapter').innerHTML;
-    current_chapter_index = parseInt(current_chapter_number);
+    // 토큰, 현재 책/장, 책갈피 이름을 서버에 전송
+    const token = localStorage.getItem('token');
+    const current_book_name = document.querySelector('#current_book').innerHTML;
+    const current_chapter_number = document.querySelector('#current_chapter').innerHTML;
 
     const res = await fetch(`${server_address}/`, {
         method: 'POST',
@@ -868,36 +858,108 @@ async function addBookmark() {
         },
         body: JSON.stringify({
             token: `${token}`,
-            book_index: `${current_book_index}`,
-            chapter_index: `${current_chapter_index}`,
+            book: `${current_book_name}`,
+            chapter: `${current_chapter_number}`,
             tag_name: `${tag_name}`,
         }),
     });
     let inboundMessage = await res.json();
 
-    // ... token, 현재 책, 현재 장, 책갈피 이름을 서버로 전송 -> 서버에서는 DB에 책갈피 정보를 저장한다.
-    // ... token이 유효하지 않으면?
-
     if(inboundMessage.code === 200) {
-        //alert(`회원 탈퇴를 성공했습니다.`);
-        window.close();
+        let bookmarkInfo = [];
+        const existBookmark = JSON.parse(localStorage.getItem('bookmark'));
+        if(existBookmark) {
+            for(i=0 ; i<existBookmark.length ; i++) {
+                bookmarkInfo.push(existBookmark[i]);
+            }
+        }
+        let newEntry = [];
+        newEntry.push(inboundMessage.book);
+        newEntry.push(inboundMessage.chapter);
+        newEntry.push(inboundMessage.tag_name);
+        bookmarkInfo.push(newEntry);
+        localStorage.setItem('bookmark', JSON.stringify(bookmarkInfo));
     } else {
-        //alert(`회원 탈퇴에 실패했습니다.\n로그아웃 후 다시 로그인하셨다가 재시도하십시오.\n${inboundMessage.message}`);
-        window.close();
+        alert(`책갈피 추가에 실패했습니다.\n로그아웃 후 다시 로그인하셨다가 재시도하십시오.\n${inboundMessage.message}`);
     }
 }
 
-// 기존 책갈피 싱글-클릭할 경우
-// ... 해당 장으로 이동
+// 기존 책갈피 싱글-클릭할 경우 (해당 책/장으로 이동)
 function moveBookmark() {
-    // 북마크에 표시된 책, 장으로 이동
+    window.onclick = (ev) => {
+        let elem = ev.target;
+
+        const buttonText = elem.innerHTML.split(' ');
+
+        let book_button = document.querySelector('#current_book');
+        book_button.innerHTML = buttonText[0];
+        
+        let chapter_button = document.querySelector('#current_chapter');
+        chapter_button.innerHTML = buttonText[1];
+
+        showText();
+    }
 }
 
-// 기존 책갈피 더블-클릭할 경우
-// ... 책갈피 삭제
-function deleteBookmark() {
-    // token과 선택한 버튼에 대한 북마크 정보를 서버에 전송 -> 서버에서는 DB에서 해당 책갈피 정보를 제거한다.
-    // token이 유효하지 않으면?
+// 기존 책갈피 더블-클릭할 경우 (책갈피 삭제) !!! 더블클릭 이벤트 함수와 비동기 함수가 같이 작동하지 않는 것으로 보임
+async function delBookmark() {
+    window.ondblclick = (ev) => {
+        // 토큰과 클릭한 책갈피의 책/장 이름을 서버에 전송
+        const token = localStorage.getItem('token');
+        let elem = ev.target;
+        const buttonText = elem.innerHTML.split(' ');
+
+        async () => {
+            const res = await fetch(`${server_address}/`, {
+                method: 'POST',
+                headers: {
+                    'Request-Type': 'Bookmark Del Request',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    token: `${token}`,
+                    book: `${buttonText[0]}`,
+                    chapter: `${buttonText[1]}`,
+                }),
+            });
+            let inboundMessage = await res.json();
+
+            if(inboundMessage.code === 200) {
+                // 클릭한 책갈피의 책/장 이름을 로컬저장소에서 제거함
+                const bookmarkInfo = JSON.parse(localStorage.getItem('bookmark'));
+
+                if(bookmarkInfo) {
+                    let newBookmarkInfo = bookmarkInfo.filter((elem) => (elem[0] !== buttonText[0]) || (elem[1] !== buttonText[1]));
+
+                    localStorage.setItem('bookmark', JSON.stringify(newBookmarkInfo));
+                }
+            } else {
+                alert(`책갈피 제거에 실패했습니다.\n로그아웃 후 다시 로그인하셨다가 재시도하십시오.\n${inboundMessage.message}`);
+            }
+        }
+    }
+}
+
+// 기존 책갈피 표시하기
+function showBookmarks() {
+    const bookmarkInfo = JSON.parse(localStorage.getItem('bookmark'));
+
+    if(bookmarkInfo) {
+        for(i=0 ; i<bookmarkInfo.length ; i++) {
+            const book = bookmarkInfo[i][0];
+            const chapter = bookmarkInfo[i][1];
+            const tag_name = bookmarkInfo[i][2];
+    
+            const targetTag = document.getElementById('bookmark_section');
+            let bookmarkTag = document.createElement('button');
+            bookmarkTag.setAttribute('id', 'bookmark');
+            bookmarkTag.setAttribute('onclick', 'moveBookmark()');
+            bookmarkTag.setAttribute('ondblclick', 'delBookmark()');
+            bookmarkTag.innerHTML = `${book} ${chapter} : ${tag_name}`;
+    
+            targetTag.appendChild(bookmarkTag);
+        }
+    }
 }
 
 // ... 개인 데이터를 읽어올 때 토큰이 만료되었다는 메시지를 받게 되면 토큰을 삭제함

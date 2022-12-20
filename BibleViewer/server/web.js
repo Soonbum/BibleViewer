@@ -356,21 +356,23 @@ app.post('/', async (req, res) => {
   // 책갈피 추가 요청
   if(req.get('Request-Type') === 'Bookmark Add Request') {
     let token = req.body.token;
-    let location_text = fillZeroStart(2, `${req.body.book_index}`) + '_' + `${req.body.chapter_index}`;
+    let book = req.body.book;
+    let chapter = req.body.chapter;
     let tag_name = req.body.tag_name;
 
-    let id = '';
-    let sql_stmt = '';
-
     try {
-      const validateJWT = wt.verify(token, SECRET_KEY);
+      const validateJWT = jwt.verify(token, SECRET_KEY);
+
       if(validateJWT) {
-        // 개인정보가 저장되어 있는 DB 파일
-        let db = new sqlite3.Database(`${__dirname}/personInfo.db`);
+        let id = '';
+        let sql_stmt = '';
+        
+          // 개인정보가 저장되어 있는 DB 파일
+        let db_person = new sqlite3.Database(`${__dirname}/personInfo.db`);
 
         // 토큰에 해당하는 ID를 찾음
         sql_stmt = `SELECT * FROM PersonInfo WHERE jwt = '${token}'`;
-        db.all(sql_stmt, [], (err, rows) => {
+        db_person.all(sql_stmt, [], (err, rows) => {
           if(err) {
             return console.log(`${err.message}`);
           }
@@ -378,26 +380,33 @@ app.post('/', async (req, res) => {
           if(rows.length === 1) {
             id = rows[0].id;
           }
+
+          // 책갈피 정보를 저장하기 위한 DB 파일 생성
+          db_bookmark = new sqlite3.Database(`${__dirname}/bookmarkInfo.db`);
+
+          // 책갈피 정보 테이블이 없으면 생성할 것
+          db_bookmark.run('CREATE TABLE IF NOT EXISTS BookmarkInfo(id TEXT, book TEXT, chapter TEXT, tag_name TEXT, PRIMARY KEY(id, book, chapter));');
+
+          // 책갈피 정보 테이블에 책갈피를 추가함
+          sql_stmt = `INSERT INTO BookmarkInfo(id, book, chapter, tag_name) VALUES('${id}', '${book}', '${chapter}', '${tag_name}');`
+          db_bookmark.run(sql_stmt, (err) => {
+            if(err) {
+              return console.log(`${err.message}`);
+            }
+          });
         });
-        db.close();
+        
+        db_person.close();
+        db_bookmark.close();
 
-        // 북마크 정보를 저장하기 위한 DB 파일 생성
-        db = new sqlite3.Database(`${__dirname}/bookmarkInfo.db`);
-
-        // 북마크 정보 테이블이 없으면 생성할 것
-        db.run('CREATE TABLE IF NOT EXISTS BookmarkInfo(id TEXT PRIMARY KEY, location TEXT, tag_name TEXT);');
-
-        // 북마크 정보 테이블에 책갈피를 추가함
-        sql_stmt = `INSERT INTO BookmarkInfo(id, location, tag_name) VALUES('${id}', '${location_text}', '${tag_name}');`
-        db.run(sql_stmt, (err) => {
-          if(err) {
-            return console.log(`${err.message}`);
-          }
+        // 새로 생성된 책갈피 정보를 보냄
+        return res.status(200).json({
+          code: 200,
+          message: '새로 생성된 책갈피입니다.',
+          book: book,
+          chapter: chapter,
+          tag_name: tag_name
         });
-
-        db.close();
-
-        // ... 성공 -> 클라이언트에게 보냄 (위치 정보, 태그 이름)
       }
     } catch(error) {
       // 토큰이 유효하지 않으면 실패 메시지 보냄
@@ -415,6 +424,76 @@ app.post('/', async (req, res) => {
       }
     }
   }
+
+  // 책갈피 제거 요청
+  if(req.get('Request-Type') === 'Bookmark Del Request') {
+    let token = req.body.token;
+    let book = req.body.book;
+    let chapter = req.body.chapter;
+
+    try {
+      const validateJWT = jwt.verify(token, SECRET_KEY);
+
+      if(validateJWT) {
+        let id = '';
+        let sql_stmt = '';
+        
+          // 개인정보가 저장되어 있는 DB 파일
+        let db_person = new sqlite3.Database(`${__dirname}/personInfo.db`);
+
+        // 토큰에 해당하는 ID를 찾음
+        sql_stmt = `SELECT * FROM PersonInfo WHERE jwt = '${token}'`;
+        db_person.all(sql_stmt, [], (err, rows) => {
+          if(err) {
+            return console.log(`${err.message}`);
+          }
+
+          if(rows.length === 1) {
+            id = rows[0].id;
+          }
+
+          // 책갈피 정보를 저장하기 위한 DB 파일 생성
+          db_bookmark = new sqlite3.Database(`${__dirname}/bookmarkInfo.db`);
+
+          // 책갈피 정보 테이블에서 책갈피를 제거함
+          sql_stmt = `DELETE FROM BookmarkInfo WHERE id = '${id}', book = '${book}', chapter = '${chapter}'`;
+          db_bookmark.run(sql_stmt, (err) => {
+            if(err) {
+              return console.log(`${err.message}`);
+            }
+          });
+        });
+        
+        db_person.close();
+        db_bookmark.close();
+
+        // 새로 생성된 책갈피 정보를 보냄
+        return res.status(200).json({
+          code: 200,
+          message: '책갈피 제거에 성공했습니다.',
+          book: book,
+          chapter: chapter
+        });
+      }
+    } catch(error) {
+      // 토큰이 유효하지 않으면 실패 메시지 보냄
+      if(error.name === 'TokenExpiredError') {
+        return res.status(419).json({
+          code: 419,
+          message: '토큰이 만료되었습니다.'
+        });
+      }
+      if(error.name === 'JsonWebTokenError') {
+        return res.status(401).json({
+          code: 401,
+          message: '토큰이 유효하지 않습니다.'
+        });
+      }
+    }
+  }
+
+  // 책갈피 가져오기 요청
+  // ...
 });
 
 // 함수: 자릿수만큼 남은 앞부분을 0으로 채움
