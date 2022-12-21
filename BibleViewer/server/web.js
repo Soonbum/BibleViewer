@@ -132,7 +132,7 @@ app.post('/', async (req, res) => {
           sql_stmt = `INSERT INTO PersonInfo(id, password, nickname, email, jwt) VALUES('${id}', '${hashed}', '${nickname}', '${email}', '${token}');`
           db.run(sql_stmt, (err) => {
             if(err) {
-              return console.log(`${err.message}`);
+              return console.log(`회원가입 오류: ${err.message}`);
             }
             console.log(`회원정보가 저장되었습니다: ${id} / ${nickname} / ${email}`);
           });
@@ -166,7 +166,7 @@ app.post('/', async (req, res) => {
     sql_stmt = `SELECT * FROM PersonInfo WHERE id = '${id}'`;   // ID에 일치하는 레코드를 불러옴
     db.all(sql_stmt, [], (err, rows) => {
       if(err) {
-        return console.log(`${err.message}`);
+        return console.log(`로그인 오류: ${err.message}`);
       }
             
       // 만약 비밀번호가 일치할 경우
@@ -249,7 +249,7 @@ app.post('/', async (req, res) => {
         sql_stmt = `SELECT * FROM PersonInfo WHERE jwt = '${token}'`;
         db.all(sql_stmt, [], (err, rows) => {
           if(err) {
-            return console.log(`${err.message}`);
+            return console.log(`개인정보 변경 오류: ${err.message}`);
           }
 
           if(rows.length === 1) {
@@ -310,7 +310,7 @@ app.post('/', async (req, res) => {
         sql_stmt = `SELECT * FROM PersonInfo WHERE jwt = '${token}'`;
         db.all(sql_stmt, [], (err, rows) => {
           if(err) {
-            return console.log(`${err.message}`);
+            return console.log(`탈퇴 신청 오류: ${err.message}`);
           }
 
           if(rows.length === 1) {
@@ -374,7 +374,7 @@ app.post('/', async (req, res) => {
         sql_stmt = `SELECT * FROM PersonInfo WHERE jwt = '${token}'`;
         db_person.all(sql_stmt, [], (err, rows) => {
           if(err) {
-            return console.log(`${err.message}`);
+            console.log(err.message);
           }
 
           if(rows.length === 1) {
@@ -391,7 +391,7 @@ app.post('/', async (req, res) => {
           sql_stmt = `INSERT INTO BookmarkInfo(id, book, chapter, tag_name) VALUES('${id}', '${book}', '${chapter}', '${tag_name}');`
           db_bookmark.run(sql_stmt, (err) => {
             if(err) {
-              return console.log(`${err.message}`);
+              return console.log(`책갈피 추가 오류: ${err.message}`);
             }
           });
         });
@@ -456,10 +456,10 @@ app.post('/', async (req, res) => {
           db_bookmark = new sqlite3.Database(`${__dirname}/bookmarkInfo.db`);
 
           // 책갈피 정보 테이블에서 책갈피를 제거함
-          sql_stmt = `DELETE FROM BookmarkInfo WHERE id = '${id}', book = '${book}', chapter = '${chapter}'`;
+          sql_stmt = `DELETE FROM BookmarkInfo WHERE id = '${id}' AND book = '${book}' AND chapter = '${chapter}'`;
           db_bookmark.run(sql_stmt, (err) => {
             if(err) {
-              return console.log(`${err.message}`);
+              return console.log(`책갈피 제거 오류: ${err.message}`);
             }
           });
         });
@@ -493,7 +493,73 @@ app.post('/', async (req, res) => {
   }
 
   // 책갈피 가져오기 요청
-  // ...
+  if(req.get('Request-Type') === 'All Bookmark Get Request') {
+    let token = req.body.token;
+    try {
+      const validateJWT = jwt.verify(token, SECRET_KEY);
+
+      if(validateJWT) {
+        let id = '';
+        let sql_stmt = '';
+        let bookmarks = [];
+        
+        // 개인정보가 저장되어 있는 DB 파일
+        let db_person = new sqlite3.Database(`${__dirname}/personInfo.db`);
+
+        // 토큰에 해당하는 ID를 찾음
+        sql_stmt = `SELECT * FROM PersonInfo WHERE jwt = '${token}'`;
+        db_person.all(sql_stmt, [], (err, rows) => {
+          if(err) {
+            return console.log(`${err.message}`);
+          }
+
+          if(rows.length === 1) {
+            id = rows[0].id;
+          }
+
+          // 책갈피 정보를 저장하기 위한 DB 파일 생성
+          db_bookmark = new sqlite3.Database(`${__dirname}/bookmarkInfo.db`);
+
+          // 책갈피 정보 테이블에서 ID가 가진 모든 책갈피를 가져옴
+          sql_stmt = `SELECT book, chapter, tag_name FROM BookmarkInfo WHERE id = '${id}'`;
+          db_bookmark.all(sql_stmt, [], (err, rows) => {
+            if(err) {
+              return console.log(`책갈피 가져오기 오류: ${err.message}`);
+            }
+
+            for(i=0 ; i<rows.length ; i++) {
+              const newEntry = [rows[i].book, rows[i].chapter, rows[i].tag_name];
+              bookmarks.push(newEntry);
+            }
+
+            // 가져온 책갈피 정보를 보냄
+            return res.status(200).json({
+              code: 200,
+              message: '책갈피 가져오기에 성공했습니다.',
+              bookmarks: bookmarks
+            });
+          });
+        });
+        
+        db_person.close();
+        db_bookmark.close();
+      }
+    } catch(error) {
+      // 토큰이 유효하지 않으면 실패 메시지 보냄
+      if(error.name === 'TokenExpiredError') {
+        return res.status(419).json({
+          code: 419,
+          message: '토큰이 만료되었습니다.'
+        });
+      }
+      if(error.name === 'JsonWebTokenError') {
+        return res.status(401).json({
+          code: 401,
+          message: '토큰이 유효하지 않습니다.'
+        });
+      }
+    }
+  }
 });
 
 // 함수: 자릿수만큼 남은 앞부분을 0으로 채움
