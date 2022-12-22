@@ -12,6 +12,10 @@
     <title>성경 뷰어</title>
 </head>
 <body>
+    <div id="util_section">
+        <button id="darkmode" onclick="toggleDarkmode()">어둡게</button>
+    </div>
+
     <div id="membership_section">
         <button id="join" class="display-inline" onclick="window.open('join.html','회원가입','width=500px, height=600px');">회원가입</button>
         <button id="login" class="display-inline" onclick="onLogin()">로그인</button>
@@ -340,7 +344,7 @@
         <button id="show_text_button">성경 보기 모드</button>
     </div>
 
-    <div id="search_result_section" class="display-none" style="text-align:left;">
+    <div id="search_result_section" class="display-none">
         검색 결과
     </div>
     
@@ -349,11 +353,11 @@
         <button id="bookmark_del" onclick="delBookmark()">책갈피 삭제</button>
     </div>
 
-    <div id="contents_section" style="display: flex; flex-wrap: nowrap; flex-flow: row; height: 100%; vertical-align: top;">
-        <div id="bodyText" style="padding: 1em;" class="display-none">서버가 꺼져 있습니다.</div>
-        <div id="bodyText" style="padding: 1em;" class="display-none">서버가 꺼져 있습니다.</div>
-        <div id="bodyText" style="padding: 1em;" class="display-none">서버가 꺼져 있습니다.</div>
-        <div id="bodyText" style="padding: 1em;" class="display-none">서버가 꺼져 있습니다.</div>
+    <div id="contents_section">
+        <div id="bodyText" class="display-none">서버가 꺼져 있습니다.</div>
+        <div id="bodyText" class="display-none">서버가 꺼져 있습니다.</div>
+        <div id="bodyText" class="display-none">서버가 꺼져 있습니다.</div>
+        <div id="bodyText" class="display-none">서버가 꺼져 있습니다.</div>
     </div>
 </body>
 </html>

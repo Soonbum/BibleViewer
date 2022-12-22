@@ -546,7 +546,7 @@ async function showText() {
 
                 // 1번째 공백을 기준으로 처음 나오는 절 번호에 컬러값 부여
                 let spacePos = inboundText[j].indexOf(' ');
-                let statement = '<div class="text-line"><p style="display:inline; color:#FB7A01;">' + inboundText[j].substr(0, spacePos) + '</p>' + inboundText[j].substr(spacePos, inboundText[j].length) + '</div>';
+                let statement = '<div class="text-line"><p class="verse-number">' + inboundText[j].substr(0, spacePos) + '</p>' + inboundText[j].substr(spacePos, inboundText[j].length) + '</div>';
 
                 bodyText += statement;
                 horizontalLineCount++;
@@ -999,6 +999,20 @@ function showBookmarks() {
     
             targetTag.appendChild(bookmarkTag);
         }
+    }
+}
+
+// 함수: 다크모드 토글
+function toggleDarkmode() {
+    let darkmode_button = document.querySelector('#darkmode');
+    if(darkmode_button.innerHTML === '어둡게') {
+        // 다크 모드로 전환
+        darkmode_button.innerHTML = '밝게';
+        document.documentElement.setAttribute('color-theme', 'dark');
+    } else {
+        // 라이트 모드로 전환
+        darkmode_button.innerHTML = '어둡게';
+        document.documentElement.setAttribute('color-theme', 'light');
     }
 }
 
