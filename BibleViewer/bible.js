@@ -572,10 +572,21 @@ function textHilighting() {
         if(ev.target.tagName === 'DIV' && ev.target.className === 'text-line') {
             let elem = ev.target;
             if(elem.className === 'text-line') {
-                if(elem.style.backgroundColor === "rgb(204, 204, 204)") {
-                    elem.style.backgroundColor = "rgb(255, 255, 255)";
+                let darkmode_button = document.querySelector('#darkmode');
+                if(darkmode_button.innerHTML === '밝게') {
+                    // 다크 모드
+                    if(elem.style.backgroundColor === "rgb(150, 150, 150)") {
+                        elem.style.backgroundColor = "rgb(51, 51, 51)";     // Off
+                    } else {
+                        elem.style.backgroundColor = "rgb(150, 150, 150)";  // On
+                    }
                 } else {
-                    elem.style.backgroundColor = "rgb(204, 204, 204)";
+                    // 라이트 모드
+                    if(elem.style.backgroundColor === "rgb(204, 204, 204)") {
+                        elem.style.backgroundColor = "rgb(255, 255, 255)";  // Off
+                    } else {
+                        elem.style.backgroundColor = "rgb(204, 204, 204)";  // On
+                    }
                 }
             }
         }
