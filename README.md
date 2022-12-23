@@ -44,7 +44,7 @@
 
 # 현재 서비스 중
   
-![스크린샷](https://user-images.githubusercontent.com/16474083/204410530-ec085be5-bb4d-463e-b50d-50f187d9b020.png)
+![스크린샷](https://user-images.githubusercontent.com/16474083/209277443-665a12d9-e8d0-4264-8bf7-733496e9e163.png)
 
   - [성경 뷰어](http://peacemaker84.dothome.co.kr/BibleViewer/index.html)
   
