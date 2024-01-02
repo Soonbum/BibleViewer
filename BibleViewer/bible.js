@@ -1001,7 +1001,6 @@ async function delAllBookmark() {
         } else {
             alert(`책갈피 제거에 실패했습니다.\n로그아웃 후 다시 로그인하셨다가 재시도하십시오.\n${inboundMessage.message}`);
         }
-    }
 
     showBookmarks();
 }
