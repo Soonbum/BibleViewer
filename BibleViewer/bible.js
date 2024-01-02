@@ -30,7 +30,7 @@ const book_info = [ ['창세기', '창', 50],
                     ['아가', '아', 8],
                     ['이사야', '사', 66],
                     ['예레미야', '렘', 52],
-                    ['예레미야 애가', '애', 5],
+                    ['예레미야애가', '애', 5],
                     ['에스겔', '겔', 48],
                     ['다니엘', '단', 12],
                     ['호세아', '호', 14],
@@ -977,6 +977,27 @@ async function delBookmark() {
 
                 localStorage.setItem('bookmark', JSON.stringify(newBookmarkInfo));
             }
+        } else {
+            alert(`책갈피 제거에 실패했습니다.\n로그아웃 후 다시 로그인하셨다가 재시도하십시오.\n${inboundMessage.message}`);
+        }
+    }
+
+    showBookmarks();
+}
+
+// 책갈피 모두 삭제 버튼 클릭할 경우
+async function delAllBookmark() {
+        const res = await fetch(`${server_address}/`, {
+            method: 'POST',
+            headers: {
+                'Request-Type': 'Bookmark Del All Request',
+                'Content-Type': 'application/json',
+            },
+        });
+        let inboundMessage = await res.json();
+
+        if(inboundMessage.code === 200) {
+            localStorage.removeItem('bookmark');
         } else {
             alert(`책갈피 제거에 실패했습니다.\n로그아웃 후 다시 로그인하셨다가 재시도하십시오.\n${inboundMessage.message}`);
         }
