@@ -985,26 +985,6 @@ async function delBookmark() {
     showBookmarks();
 }
 
-// 책갈피 모두 삭제 버튼 클릭할 경우
-async function delAllBookmark() {
-        const res = await fetch(`${server_address}/`, {
-            method: 'POST',
-            headers: {
-                'Request-Type': 'Bookmark Del All Request',
-                'Content-Type': 'application/json',
-            },
-        });
-        let inboundMessage = await res.json();
-
-        if(inboundMessage.code === 200) {
-            localStorage.removeItem('bookmark');
-        } else {
-            alert(`책갈피 제거에 실패했습니다.\n로그아웃 후 다시 로그인하셨다가 재시도하십시오.\n${inboundMessage.message}`);
-        }
-
-    showBookmarks();
-}
-
 // 기존 책갈피 표시하기
 function showBookmarks() {
     // 기존 책갈피 버튼 모두 제거하고
