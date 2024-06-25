@@ -14,8 +14,6 @@
     
     - bible.js = 메인화면을 제어하는 스크립트
 
-    - style.css = 메인화면을 꾸미는 스타일 정의 문서
-    
     - server/web.js = 서버 구동 스크립트 (서버는 본문, 검색 요청에 대하여 응답함)
 
     - server/package.json = 서버 패키지 설명
