@@ -770,7 +770,12 @@ async function showText() {
                 // 1번째 공백을 기준으로 처음 나오는 절 번호 위치를 골라냄
                 let spacePos = inboundText[j].indexOf(' ');
                 // 절 번호: inboundText[j].substr(0, spacePos), 절 내용: inboundText[j].substr(spacePos, inboundText[j].length)
-                let statement = '<div id="text"><p class="verse-number">' + inboundText[j].substr(0, spacePos) + '</p><p class="verse-text">' + inboundText[j].substr(spacePos, inboundText[j].length) + '</p></div>';
+                let statement;
+                if (darkmode_button.innerHTML === '밝게') {
+                    statement = '<div id="text" color-theme="dark"><p class="verse-number">' + inboundText[j].substr(0, spacePos) + '</p><p class="verse-text">' + inboundText[j].substr(spacePos, inboundText[j].length) + '</p></div>';
+                } else {
+                    statement = '<div id="text" color-theme="light"><p class="verse-number">' + inboundText[j].substr(0, spacePos) + '</p><p class="verse-text">' + inboundText[j].substr(spacePos, inboundText[j].length) + '</p></div>';
+                }
                 bodyText += statement;
 
                 // 5절씩 끊기
