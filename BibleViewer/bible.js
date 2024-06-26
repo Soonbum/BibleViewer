@@ -2,8 +2,8 @@
 // 밑줄 저장 기능, 메모 기능, 방문자 기록 기능, 관리자 페이지(읽기 체크 초기화, 역본/여백/장 표시 설정, 개인 데이터 백업/복구, 자동 백업), 읽기 체크 기능
 
 // 서버 주소
-const server_address = 'http://bibleviewer.cafe24app.com';
-//const server_address = 'http://localhost:8001';
+//const server_address = 'http://bibleviewer.cafe24app.com';
+const server_address = 'http://localhost:8001';
 
 // 멤버십 필드 초기화
 join.classList = 'show';
@@ -88,18 +88,18 @@ const book_info = [ ['창세기', '창', 50],
                     ['유다서', '유', 1],
                     ['요한계시록', '계', 22], ];
 
+// 새로고침 후에도 다크모드 상태 고정
+if (localStorage.getItem('darkmode_button') !== null) {
+    if (localStorage.getItem('darkmode_button') !== darkmode_button.innerHTML)
+        darkmode();
+}
+
 // 책, 장 버튼 숨김
 document.getElementById('book_button_collection').classList = 'hidden';
 document.getElementById('chapter_button_collection').classList = 'hidden';
 
 // 검색 결과 숨김
 document.getElementById('section_search_result').classList = 'hidden';
-
-// 야간 시간대에는 어둡게, 주간 시간대에는 밝게 시작함 
-const currentHour = new Date().getHours();
-document.getElementById('darkmode_button').innerHTML = (currentHour >= 6 && currentHour <= 18) ? '어둡게' : '밝게';
-darkmode();
-darkmode(); // 두 번 실행해야 원하는 대로 작동함
 
 // 역본 개수 초기화
 if (localStorage.getItem('version_combos') !== null) {
@@ -241,12 +241,14 @@ function darkmode() {
     if (darkmode_button.innerHTML === '어둡게') {
         // 다크 모드로 전환
         darkmode_button.innerHTML = '밝게';
+        localStorage.setItem('darkmode_button', '밝게');
         allElements.forEach(element => {
             element.setAttribute('color-theme', 'dark');
         });
     } else {
         // 라이트 모드로 전환
         darkmode_button.innerHTML = '어둡게';
+        localStorage.setItem('darkmode_button', '어둡게');
         allElements.forEach(element => {
             element.setAttribute('color-theme', 'light');
         });
@@ -836,7 +838,7 @@ listen_button.addEventListener('click', () => {
         let verseTexts = document.querySelectorAll('.verse-text');
         let extractedTexts = '';
         verseTexts.forEach(p => {
-            extractedTexts += `<p class="verse-text">${p.innerHTML}</p>`;
+            extractedTexts += `${p.innerHTML}`;
         });
         extractedTexts.replace(/[\(\)\[\]{}一-龥]*/gm, '')
         u = new SpeechSynthesisUtterance(extractedTexts);
