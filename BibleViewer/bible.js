@@ -2,8 +2,8 @@
 // 밑줄 저장 기능, 메모 기능, 방문자 기록 기능, 관리자 페이지(읽기 체크 초기화, 역본/여백/장 표시 설정, 개인 데이터 백업/복구, 자동 백업), 읽기 체크 기능
 
 // 서버 주소
-//const server_address = 'http://bibleviewer.cafe24app.com';
-const server_address = 'http://localhost:8001';
+const server_address = 'http://bibleviewer.cafe24app.com';
+//const server_address = 'http://localhost:8001';
 
 // 멤버십 필드 초기화
 join.classList = 'show';
@@ -87,12 +87,6 @@ const book_info = [ ['창세기', '창', 50],
                     ['요한3서', '요삼', 1],
                     ['유다서', '유', 1],
                     ['요한계시록', '계', 22], ];
-
-// 새로고침 후에도 다크모드 상태 고정
-if (localStorage.getItem('darkmode_button') !== null) {
-    if (localStorage.getItem('darkmode_button') !== darkmode_button.innerHTML)
-        darkmode();
-}
 
 // 책, 장 버튼 숨김
 document.getElementById('book_button_collection').classList = 'hidden';
@@ -819,6 +813,12 @@ async function showText() {
         localStorage.setItem('font_size', fontSize + 'px');
     }
 
+    // 새로고침 후에도 다크모드 상태 고정
+    if (localStorage.getItem('darkmode_button') !== null) {
+        if (localStorage.getItem('darkmode_button') !== darkmode_button.innerHTML)
+            darkmode();
+    }
+    
     personalLayout();
     showBookmarks();
 }
@@ -838,7 +838,7 @@ listen_button.addEventListener('click', () => {
         let verseTexts = document.querySelectorAll('.verse-text');
         let extractedTexts = '';
         verseTexts.forEach(p => {
-            extractedTexts += `${p.innerHTML}`;
+            extractedTexts += p.innerHTML;
         });
         extractedTexts.replace(/[\(\)\[\]{}一-龥]*/gm, '')
         u = new SpeechSynthesisUtterance(extractedTexts);
@@ -1172,27 +1172,52 @@ async function addBookmark() {
         tag_name = '';
     }
 
-    // 토큰, 현재 책/장, 책갈피 이름을 서버에 전송
-    const token = localStorage.getItem('token');
-    const current_book_name = document.querySelector('#current_book_button').innerHTML;
-    const current_chapter_number = document.querySelector('#current_chapter_button').innerHTML;
+    if (localStorage.getItem('token')) {
+        // 온라인 모드
 
-    const res = await fetch(`${server_address}/`, {
-        method: 'POST',
-        headers: {
-            'Request-Type': 'Bookmark Add Request',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            token: `${token}`,
-            book: `${current_book_name}`,
-            chapter: `${current_chapter_number}`,
-            tag_name: `${tag_name}`,
-        }),
-    });
-    let inboundMessage = await res.json();
+        // 토큰, 현재 책/장, 책갈피 이름을 서버에 전송
+        const token = localStorage.getItem('token');
+        const current_book_name = document.querySelector('#current_book_button').innerHTML;
+        const current_chapter_number = document.querySelector('#current_chapter_button').innerHTML;
 
-    if(inboundMessage.code === 200) {
+        const res = await fetch(`${server_address}/`, {
+            method: 'POST',
+            headers: {
+                'Request-Type': 'Bookmark Add Request',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                token: `${token}`,
+                book: `${current_book_name}`,
+                chapter: `${current_chapter_number}`,
+                tag_name: `${tag_name}`,
+            }),
+        });
+        let inboundMessage = await res.json();
+
+        if(inboundMessage.code === 200) {
+            let bookmarkInfo = [];
+            const existBookmark = JSON.parse(localStorage.getItem('bookmark'));
+            if(existBookmark) {
+                for(i=0 ; i<existBookmark.length ; i++) {
+                    bookmarkInfo.push(existBookmark[i]);
+                }
+            }
+            let newEntry = [];
+            newEntry.push(inboundMessage.book);
+            newEntry.push(inboundMessage.chapter);
+            newEntry.push(inboundMessage.tag_name);
+            bookmarkInfo.push(newEntry);
+            localStorage.setItem('bookmark', JSON.stringify(bookmarkInfo));
+        } else {
+            alert(`책갈피 추가에 실패했습니다.\n로그아웃 후 다시 로그인하셨다가 재시도하십시오.\n${inboundMessage.message}`);
+        }
+    } else {
+        // 오프라인 모드
+
+        const current_book_name = document.querySelector('#current_book_button').innerHTML;
+        const current_chapter_number = document.querySelector('#current_chapter_button').innerHTML;
+
         let bookmarkInfo = [];
         const existBookmark = JSON.parse(localStorage.getItem('bookmark'));
         if(existBookmark) {
@@ -1201,13 +1226,11 @@ async function addBookmark() {
             }
         }
         let newEntry = [];
-        newEntry.push(inboundMessage.book);
-        newEntry.push(inboundMessage.chapter);
-        newEntry.push(inboundMessage.tag_name);
+        newEntry.push(current_book_name);
+        newEntry.push(current_chapter_number);
+        newEntry.push(tag_name);
         bookmarkInfo.push(newEntry);
         localStorage.setItem('bookmark', JSON.stringify(bookmarkInfo));
-    } else {
-        alert(`책갈피 추가에 실패했습니다.\n로그아웃 후 다시 로그인하셨다가 재시도하십시오.\n${inboundMessage.message}`);
     }
 
     showBookmarks();
@@ -1235,34 +1258,60 @@ function moveBookmark() {
 // 책갈피 삭제 버튼 클릭할 경우
 async function delBookmark() {
     let bookmark_buttons = document.querySelectorAll('#bookmark');
-    for(i=0 ; i < bookmark_buttons.length ; i++) {
-        let bookmark_button = bookmark_buttons[i];
-        // 토큰과 클릭한 책갈피의 책/장 이름을 서버에 전송
-        const token = localStorage.getItem('token');
-        const buttonText = bookmark_button.className.split('_');
 
-        // 현재 책/장과 일치하는 책갈피 버튼을 찾아서 지움
-        let current_book_button = document.querySelector('#current_book_button');
-        let current_chapter_button = document.querySelector('#current_chapter_button');
-        if((current_book_button.innerHTML !== buttonText[0]) || (current_chapter_button.innerHTML !== buttonText[1]))
-            continue;
+    if (localStorage.getItem('token')) {
+        // 온라인 모드
+        for(i=0 ; i < bookmark_buttons.length ; i++) {
+            let bookmark_button = bookmark_buttons[i];
+            // 토큰과 클릭한 책갈피의 책/장 이름을 서버에 전송
+            const token = localStorage.getItem('token');
+            const buttonText = bookmark_button.className.split('_');
 
-        const res = await fetch(`${server_address}/`, {
-            method: 'POST',
-            headers: {
-                'Request-Type': 'Bookmark Del Request',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                token: `${token}`,
-                book: `${buttonText[0]}`,
-                chapter: `${buttonText[1]}`,
-            }),
-        });
-        let inboundMessage = await res.json();
+            // 현재 책/장과 일치하는 책갈피 버튼을 찾아서 지움
+            let current_book_button = document.querySelector('#current_book_button');
+            let current_chapter_button = document.querySelector('#current_chapter_button');
+            if((current_book_button.innerHTML !== buttonText[0]) || (current_chapter_button.innerHTML !== buttonText[1]))
+                continue;
 
-        if(inboundMessage.code === 200) {
-            // 클릭한 책갈피의 책/장 이름을 로컬저장소에서 제거함
+            const res = await fetch(`${server_address}/`, {
+                method: 'POST',
+                headers: {
+                    'Request-Type': 'Bookmark Del Request',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    token: `${token}`,
+                    book: `${buttonText[0]}`,
+                    chapter: `${buttonText[1]}`,
+                }),
+            });
+            let inboundMessage = await res.json();
+
+            if(inboundMessage.code === 200) {
+                // 클릭한 책갈피의 책/장 이름을 로컬저장소에서 제거함
+                const bookmarkInfo = JSON.parse(localStorage.getItem('bookmark'));
+
+                if(bookmarkInfo) {
+                    let newBookmarkInfo = bookmarkInfo.filter((elem) => (elem[0] !== buttonText[0]) || (elem[1] !== buttonText[1]));
+
+                    localStorage.setItem('bookmark', JSON.stringify(newBookmarkInfo));
+                }
+            } else {
+                alert(`책갈피 제거에 실패했습니다.\n로그아웃 후 다시 로그인하셨다가 재시도하십시오.\n${inboundMessage.message}`);
+            }
+        }
+    } else {
+        // 오프라인 모드
+        for(i=0 ; i < bookmark_buttons.length ; i++) {
+            let bookmark_button = bookmark_buttons[i];
+
+            const buttonText = bookmark_button.className.split('_');
+
+            let current_book_button = document.querySelector('#current_book_button');
+            let current_chapter_button = document.querySelector('#current_chapter_button');
+            if((current_book_button.innerHTML !== buttonText[0]) || (current_chapter_button.innerHTML !== buttonText[1]))
+                continue;
+
             const bookmarkInfo = JSON.parse(localStorage.getItem('bookmark'));
 
             if(bookmarkInfo) {
@@ -1270,8 +1319,6 @@ async function delBookmark() {
 
                 localStorage.setItem('bookmark', JSON.stringify(newBookmarkInfo));
             }
-        } else {
-            alert(`책갈피 제거에 실패했습니다.\n로그아웃 후 다시 로그인하셨다가 재시도하십시오.\n${inboundMessage.message}`);
         }
     }
 
